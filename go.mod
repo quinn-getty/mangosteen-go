@@ -2,7 +2,11 @@ module mangosteen
 
 go 1.20
 
-require github.com/stretchr/testify v1.8.4
+require (
+	github.com/gin-gonic/gin v1.9.1
+	github.com/lib/pq v1.10.9
+	github.com/stretchr/testify v1.8.4
+)
 
 require (
 	github.com/bytedance/sonic v1.10.0 // indirect
@@ -11,7 +15,6 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
-	github.com/gin-gonic/gin v1.9.1 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator/v10 v10.15.0 // indirect
