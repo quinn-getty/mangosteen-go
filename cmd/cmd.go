@@ -30,9 +30,19 @@ func Run() {
 		},
 	}
 
-	rootCmd.AddCommand(serverCmd)
+	dbMigrateCom := &cobra.Command{
+		Use: "migrate",
+		Run: func(cmd *cobra.Command, args []string) {
+			database.Migrate()
+		},
+	}
+
 	rootCmd.AddCommand(dbCmd)
+	rootCmd.AddCommand(serverCmd)
+
 	dbCmd.AddCommand(dbCreateCmd)
+	dbCmd.AddCommand(dbMigrateCom)
+
 	database.Connect()
 	defer database.Close()
 	rootCmd.Execute()
