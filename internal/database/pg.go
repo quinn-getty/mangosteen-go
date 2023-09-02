@@ -44,20 +44,20 @@ func CreateTables() {
 	log.Println("create users table success")
 }
 
-func handleError(err error) {
+func handleError(err error, successMsg string) {
 	if err != nil {
 		log.Println(err)
+	} else if successMsg != "" {
+		fmt.Println(successMsg)
 	}
 }
 
 func Migrate() {
 	_, err := DB.Exec(`ALTER TABLE users ADD COLUMN address VARCHAR(200)`)
-	handleError(err)
-	log.Println("users add address success")
+	handleError(err, "users add address success")
 
 	_, err = DB.Exec(`ALTER TABLE users ADD COLUMN phone VARCHAR(50)`)
-	handleError(err)
-	log.Println("users add phone success")
+	handleError(err, "users add phone success")
 
 	_, err = DB.Exec(`CREATE TABLE IF NOT EXISTS items (
 		id SERIAL PRIMARY KEY,
@@ -66,9 +66,52 @@ func Migrate() {
 		created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 		updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 		)`)
-	handleError(err)
-	log.Println("create items table success")
+	handleError(err, "create items table success")
+}
 
+func Curd() {
+	// 新增
+	_, err := DB.Exec(`INSERT INTO users (email) values ('1@qq.com')`)
+	handleError(err, "create a user success")
+
+	// 更新
+	_, err = DB.Exec(`Update users SET phone = 15504473441 where email = '1@qq.com'`)
+	handleError(err, "update success")
+
+	// 条件查询
+	// result, err := DB.Query(`SELECT phone FROM users where email = '1@qq.com'`)
+	// log.Println(result)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// } else {
+	// 	for result.Next() {
+	// 		var phone string
+	// 		result.Scan(&phone)
+	// 		log.Println(phone)
+	// 	}
+	// 	log.Println("Select success")
+	// }
+
+	// 分页查询 （更安全）
+	stmt, err := DB.Prepare(`SELECT phone FROM users where email = $1 offset $2 limit $3`)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	result, err := stmt.Query("1@qq.com", 0, 3)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		for result.Next() {
+			var phone string
+			result.Scan(&phone)
+			log.Println(phone)
+		}
+		log.Println("Select success")
+	}
+
+	// 删除
+	// _, err := DB.Exec(`DELETE FROM users WHERE email = '1@qq.com'`)
+	// handleError(err, "delete success")
 }
 
 func Close() {

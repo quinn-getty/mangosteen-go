@@ -37,11 +37,16 @@ func Run() {
 		},
 	}
 
-	rootCmd.AddCommand(dbCmd)
-	rootCmd.AddCommand(serverCmd)
+	dbCurd := &cobra.Command{
+		Use: "curd",
+		Run: func(cmd *cobra.Command, args []string) {
+			database.Curd()
+		},
+	}
 
-	dbCmd.AddCommand(dbCreateCmd)
-	dbCmd.AddCommand(dbMigrateCom)
+	rootCmd.AddCommand(serverCmd, dbCmd)
+
+	dbCmd.AddCommand(dbCreateCmd, dbMigrateCom, dbCurd)
 
 	database.Connect()
 	defer database.Close()
