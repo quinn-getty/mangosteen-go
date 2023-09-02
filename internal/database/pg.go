@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	_ "github.com/lib/pq"
+	"github.com/lib/pq"
 )
 
 const (
@@ -67,18 +67,39 @@ func Migrate() {
 		updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 		)`)
 	handleError(err, "create items table success")
+
+	// 给users 的email 增加唯一索引
+	_, err = DB.Exec(`CREATE UNIQUE INDEX user_email_index ON users (email)`)
+	if err != nil {
+		log.Println(err)
+	} else {
+		log.Println("给users 的 email 添加唯一索引成功")
+	}
 }
 
 func Curd() {
 	// 新增
 	_, err := DB.Exec(`INSERT INTO users (email) values ('1@qq.com')`)
-	handleError(err, "create a user success")
+	if err != nil {
+		switch err.(type) {
+		case *pq.Error:
+			pqErr := err.(*pq.Error)
+			log.Println(pqErr.Code.Name())
+			log.Println(pqErr.Message)
+		default:
+			log.Println(err)
+		}
 
-	// 更新
-	_, err = DB.Exec(`Update users SET phone = 15504473441 where email = '1@qq.com'`)
-	handleError(err, "update success")
+	} else {
+		log.Println("create a user success")
 
-	// 条件查询
+	}
+
+	// // 更新
+	// _, err = DB.Exec(`Update users SET phone = 15504473441 where email = '1@qq.com'`)
+	// handleError(err, "update success")
+
+	//  // 条件查询
 	// result, err := DB.Query(`SELECT phone FROM users where email = '1@qq.com'`)
 	// log.Println(result)
 	// if err != nil {
@@ -92,25 +113,25 @@ func Curd() {
 	// 	log.Println("Select success")
 	// }
 
-	// 分页查询 （更安全）
-	stmt, err := DB.Prepare(`SELECT phone FROM users where email = $1 offset $2 limit $3`)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	result, err := stmt.Query("1@qq.com", 0, 3)
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		for result.Next() {
-			var phone string
-			result.Scan(&phone)
-			log.Println(phone)
-		}
-		log.Println("Select success")
-	}
+	// // 分页查询 （更安全）
+	// stmt, err := DB.Prepare(`SELECT phone FROM users where email = $1 offset $2 limit $3`)
+	// if err != nil {
+	// 	log.Fatalln(err)
+	// }
+	// result, err := stmt.Query("1@qq.com", 0, 3)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// } else {
+	// 	for result.Next() {
+	// 		var phone string
+	// 		result.Scan(&phone)
+	// 		log.Println(phone)
+	// 	}
+	// 	log.Println("Select success")
+	// }
 
-	// 删除
-	// _, err := DB.Exec(`DELETE FROM users WHERE email = '1@qq.com'`)
+	// // 删除
+	// _, err = DB.Exec(`DELETE FROM users WHERE email = '1@qq.com'`)
 	// handleError(err, "delete success")
 }
 
