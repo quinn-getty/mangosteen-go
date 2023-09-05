@@ -79,6 +79,39 @@ func Migrate() {
 }
 
 func Curd() {
+	// // 新增
+	// user := User{Email: "7@qq.com", Phone: ""}
+	// tx := DB.Create(&user)
+	// log.Println(tx.RowsAffected)
+	// log.Println(user)
+
+	// // 查询
+	// u2 := User{Phone: "15504473441"}
+	// _ = DB.Find(&u2, 1)
+	// log.Println(u2)
+
+	// // 修改
+	// u2.Phone = "15500000000"
+	// tx := DB.Save(&u2)
+	// if tx.Error != nil {
+	// 	log.Println(tx.Error)
+	// } else {
+	// 	log.Println(tx.RowsAffected)
+	// 	log.Println(u2)
+	// }
+
+	// //  查询多个数据
+	// users := []User{}
+	// DB.Offset(0).Limit(10).Find(&users)
+	// log.Println(users)
+
+	// // 删除
+	// tx := DB.Delete(&User{ID: 1})
+	// if tx.Error != nil {
+	// 	log.Println(tx.Error)
+	// } else {
+	// 	log.Println(tx.RowsAffected)
+	// }
 
 }
 
