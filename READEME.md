@@ -37,3 +37,7 @@ migrate -database "postgres://mangosteen:123456@pg-for-go-mangosteen:5432/mangos
 ### 升级 全量
 
 migrate -database "postgres://mangosteen:123456@pg-for-go-mangosteen:5432/mangosteen_dev?sslmode=disable" -source "file://$(pwd)/config/migrations" up
+
+## 更新 user 表字段
+
+migrate create -ext sql -dir config/migrations -seq add_phone_for_users
