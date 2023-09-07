@@ -116,8 +116,24 @@ func Curd() {
 		log.Println(err)
 	} else {
 		log.Println("更新成功")
-
 	}
+
+	// 查询列表
+	userList, err := q.ListUsers(DBCtx, queries.ListUsersParams{
+		Offset: 0,
+		Limit:  10,
+	})
+	if err != nil {
+		log.Println(err)
+	} else {
+		log.Println(userList)
+	}
+
+	err = q.DeleteUser(DBCtx, userList[0].ID)
+	if err != nil {
+		log.Println(err)
+	}
+	log.Println("删除成功")
 
 }
 

@@ -1,3 +1,16 @@
+-- name: ListUsers :many
+SELECT
+  *
+FROM
+  users
+ORDER BY
+  id OFFSET $1
+LIMIT $2;
+
+-- name: DeleteUser :exec
+DELETE FROM users
+WHERE id = $1;
+
 -- name: CreateUser :one
 INSERT INTO users(email)
   VALUES ($1)
