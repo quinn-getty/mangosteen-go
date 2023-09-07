@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"mangosteen/config/queries"
+	"math/rand"
 	"os"
 	"os/exec"
 
@@ -96,12 +97,26 @@ func MigrateDown() {
 func Curd() {
 	// 增加
 	q := queries.New(DB)
-	// q:=querie
-	user, err := q.CreateUser(DBCtx, "1@qq.com")
+	email := fmt.Sprintf("%d@qq.com", rand.Int())
+	user, err := q.CreateUser(DBCtx, email)
 	if err != nil {
-		log.Println("err")
+		log.Println(err)
 	} else {
 		log.Println(user)
+	}
+
+	// 更新
+	err = q.UpdateUser(DBCtx, queries.UpdateUserParams{
+		ID:      user.ID,
+		Email:   user.Email,
+		Phone:   user.Phone,
+		Address: "中国四川成都",
+	})
+	if err != nil {
+		log.Println(err)
+	} else {
+		log.Println("更新成功")
+
 	}
 
 }

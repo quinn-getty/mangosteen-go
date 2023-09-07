@@ -10,12 +10,10 @@ import (
 )
 
 const createUser = `-- name: CreateUser :one
-INSERT INTO users (
-  email
-) values (
-  $1
-) 
-RETURNING id, email, phone, address, created_at, updated_at
+INSERT INTO users(email)
+  VALUES ($1)
+RETURNING
+  id, email, phone, address, created_at, updated_at
 `
 
 func (q *Queries) CreateUser(ctx context.Context, email string) (User, error) {
@@ -30,4 +28,32 @@ func (q *Queries) CreateUser(ctx context.Context, email string) (User, error) {
 		&i.UpdatedAt,
 	)
 	return i, err
+}
+
+const updateUser = `-- name: UpdateUser :exec
+UPDATE
+  users
+SET
+  email = $2,
+  phone = $3,
+  address = $4
+WHERE
+  id = $1
+`
+
+type UpdateUserParams struct {
+	ID      int32
+	Email   string
+	Phone   string
+	Address string
+}
+
+func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
+	_, err := q.db.ExecContext(ctx, updateUser,
+		arg.ID,
+		arg.Email,
+		arg.Phone,
+		arg.Address,
+	)
+	return err
 }
