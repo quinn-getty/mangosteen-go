@@ -39,7 +39,7 @@ func CreateTables() {
 
 }
 
-func Migrate() {
+func MigrateUp() {
 	pwd, err := os.Getwd()
 	if err != nil {
 		log.Fatalln(err)
@@ -57,7 +57,28 @@ func Migrate() {
 	if err != nil {
 		log.Fatalln(err)
 	}
+	log.Println("迁移成功")
+}
 
+func MigrateDown() {
+	pwd, err := os.Getwd()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	m, err := migrate.New(
+		fmt.Sprintf("file://%s/config/migrations", pwd),
+		fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable", user, password, host, port, dbname),
+	)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	err = m.Steps(-1)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	log.Println("已会退一个版本！")
 }
 
 func Curd() {

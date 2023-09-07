@@ -34,6 +34,8 @@ go build .; ./mangosteen db create:migration create_users_table
 
 ### 降级 一次
 
+go build .; ./mangosteen db migrate:down
+或者
 migrate -database "postgres://mangosteen:123456@pg-for-go-mangosteen:5432/mangosteen_dev?sslmode=disable" -source "file://$(pwd)/config/migrations" down 1
 
 ### 升级 全量
