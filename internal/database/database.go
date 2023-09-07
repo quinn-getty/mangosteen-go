@@ -1,12 +1,15 @@
 package database
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
-	"time"
+	"os"
+	"os/exec"
 
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
+	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
 const (
@@ -17,110 +20,49 @@ const (
 	dbname   = "mangosteen_dev"
 )
 
-var DB *gorm.DB
+var DB *sql.DB
 
 func Connect() {
-	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
+	// dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
 	// dsn := "host=localhost user=gorm password=gorm dbname=gorm port=9920 sslmode=disable TimeZone=Asia/Shanghai"
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+}
+
+func CreateMigrate(filename string) {
+	cmd := exec.Command("migrate", "create", "-ext", "sql", "-dir", "config/migrations", "-seq", filename)
+	err := cmd.Run()
 	if err != nil {
 		log.Fatalln(err)
 	}
-	DB = db
-
-	// connStr := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
-	// db, err := sql.Open("postgres", connStr)
-	// if err != nil {
-	// 	log.Fatalln(err)
-	// }
-	// DB = db
-	// err = db.Ping()
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// log.Println("connect db success")
+	log.Printf("创建迁移文件%s成功", filename)
 }
-
-type User struct {
-	ID        int
-	Email     string `gorm:"uniqueIndex"`
-	Phone     string
-	Address   string
-	CreatedAt time.Time
-	UpdatedAt time.Time
-}
-
-type Item struct {
-	ID         int
-	UserID     int
-	Amount     int
-	HappenedAt time.Time
-	CreatedAt  time.Time
-	UpdatedAt  time.Time
-}
-
-var modules = []any{&User{}, &Item{}}
-
 func CreateTables() {
-	for _, module := range modules {
-		err := DB.Migrator().CreateTable(module)
-		if err != nil {
-			log.Println(err)
-		} else {
-			log.Println("创建 表成功")
-		}
 
-	}
 }
 
 func Migrate() {
-	// 给users 增加 address
-	DB.AutoMigrate(modules...)
-}
-
-func Curd() {
-	// // 新增
-	// user := User{Email: "7@qq.com", Phone: ""}
-	// tx := DB.Create(&user)
-	// log.Println(tx.RowsAffected)
-	// log.Println(user)
-
-	// // 查询
-	// u2 := User{Phone: "15504473441"}
-	// _ = DB.Find(&u2, 1)
-	// log.Println(u2)
-
-	// // 修改
-	// u2.Phone = "15500000000"
-	// tx := DB.Save(&u2)
-	// if tx.Error != nil {
-	// 	log.Println(tx.Error)
-	// } else {
-	// 	log.Println(tx.RowsAffected)
-	// 	log.Println(u2)
-	// }
-
-	// //  查询多个数据
-	// users := []User{}
-	// DB.Offset(0).Limit(10).Find(&users)
-	// log.Println(users)
-
-	// // 删除
-	// tx := DB.Delete(&User{ID: 1})
-	// if tx.Error != nil {
-	// 	log.Println(tx.Error)
-	// } else {
-	// 	log.Println(tx.RowsAffected)
-	// }
-
-}
-
-func Close() {
-	sqlDB, err := DB.DB()
+	pwd, err := os.Getwd()
 	if err != nil {
 		log.Fatalln(err)
 	}
-	sqlDB.Close()
-	log.Println("close database success")
+
+	m, err := migrate.New(
+		fmt.Sprintf("file://%s/config/migrations", pwd),
+		fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable", user, password, host, port, dbname),
+	)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	err = m.Up()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+}
+
+func Curd() {
+}
+
+func Close() {
 
 }

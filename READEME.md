@@ -27,6 +27,8 @@ go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@lat
 ## 生成迁移文件
 
 migrate create -ext sql -dir config/migrations -seq create_users_table
+或者
+go build .; ./mangosteen db create:migration create_users_table
 
 ## 执行迁移
 
@@ -36,6 +38,8 @@ migrate -database "postgres://mangosteen:123456@pg-for-go-mangosteen:5432/mangos
 
 ### 升级 全量
 
+go build .; ./mangosteen db migrate
+或者
 migrate -database "postgres://mangosteen:123456@pg-for-go-mangosteen:5432/mangosteen_dev?sslmode=disable" -source "file://$(pwd)/config/migrations" up
 
 ## 更新 user 表字段
