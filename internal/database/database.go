@@ -1,9 +1,11 @@
 package database
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"log"
+	"mangosteen/config/queries"
 	"os"
 	"os/exec"
 
@@ -21,10 +23,20 @@ const (
 )
 
 var DB *sql.DB
+var DBCtx = context.Background()
 
 func Connect() {
-	// dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
-	// dsn := "host=localhost user=gorm password=gorm dbname=gorm port=9920 sslmode=disable TimeZone=Asia/Shanghai"
+	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
+	db, err := sql.Open("postgres", dsn)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	DB = db
+	err = db.Ping()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	log.Println("数据库连接成功")
 }
 
 func CreateMigrate(filename string) {
@@ -82,6 +94,16 @@ func MigrateDown() {
 }
 
 func Curd() {
+	// 增加
+	q := queries.New(DB)
+	// q:=querie
+	user, err := q.CreateUser(DBCtx, "1@qq.com")
+	if err != nil {
+		log.Println("err")
+	} else {
+		log.Println(user)
+	}
+
 }
 
 func Close() {

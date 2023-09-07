@@ -57,13 +57,11 @@ func Run() {
 			database.Curd()
 		},
 	}
-
-	rootCmd.AddCommand(serverCmd, dbCmd)
-
-	dbCmd.AddCommand(dbCreateCmd, dbMigrateCom, dbMigrateDownCom, dbMigrateCreate, dbCurd)
-
 	database.Connect()
 	defer database.Close()
+
+	rootCmd.AddCommand(serverCmd, dbCmd)
+	dbCmd.AddCommand(dbCreateCmd, dbMigrateCom, dbMigrateDownCom, dbMigrateCreate, dbCurd)
 	rootCmd.Execute()
 }
 

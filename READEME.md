@@ -18,6 +18,10 @@ docker run -d --name pg-for-go-mangosteen -e POSTGRES_USER=mangosteen -e POSTGRE
 
 go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
 
+## 解析生成包
+
+sqlc generate
+
 # 迁移表
 
 ## 安装全局 golang-migrate

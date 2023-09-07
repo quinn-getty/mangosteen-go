@@ -3,7 +3,7 @@
 //   sqlc v1.20.0
 // source: query.sql
 
-package sqlc
+package queries
 
 import (
 	"context"
@@ -15,7 +15,7 @@ INSERT INTO users (
 ) values (
   $1
 ) 
-RETURNING id, email, created_at, updated_at
+RETURNING id, email, phone, address, created_at, updated_at
 `
 
 func (q *Queries) CreateUser(ctx context.Context, email string) (User, error) {
@@ -24,6 +24,8 @@ func (q *Queries) CreateUser(ctx context.Context, email string) (User, error) {
 	err := row.Scan(
 		&i.ID,
 		&i.Email,
+		&i.Phone,
+		&i.Address,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
