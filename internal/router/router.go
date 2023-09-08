@@ -1,6 +1,7 @@
 package router
 
 import (
+	"mangosteen/config"
 	"mangosteen/docs"
 	"mangosteen/internal/controller"
 
@@ -24,6 +25,8 @@ import (
 // @externalDocs.description  OpenAPI
 // @externalDocs.url          https://swagger.io/resources/open-api/
 func New() *gin.Engine {
+	config.LoadConfig()
+
 	r := gin.Default()
 	docs.SwaggerInfo.Version = "1.0"
 

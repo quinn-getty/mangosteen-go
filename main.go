@@ -3,14 +3,13 @@ package main
 import (
 	"log"
 	"mangosteen/cmd"
+	"mangosteen/config"
 
 	"github.com/spf13/viper"
 )
 
 func main() {
-	viper.SetConfigName("env.config")
-	viper.SetConfigType("json")
-	viper.AddConfigPath(".")
+	config.LoadConfig()
 	if err := viper.ReadInConfig(); err != nil {
 		log.Fatalln(err)
 	}

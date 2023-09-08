@@ -69,3 +69,5 @@ swag init -g internal/router/router.go
 ## 格式化
 
 swag fmt
+
+# 将 env.config.json 迁移至 $HOME/.mangosteen/下
