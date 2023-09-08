@@ -21,12 +21,13 @@ type CreateSessionResBody struct {
 // 登录 godoc
 // @Summary      session
 // @Description  获取session
-// @Tags         验证码
+// @Tags         session
 // @Accept       json
 // @Produce      json
-// @Success      200
+// @Params request body CreateSessionReqBody true "query params"
+// @Success      200 {object} CreateSessionResBody
 // @Failure      500
-// @Router       /create_validation_code [post]
+// @Router       /session [post]
 func CreateSession(ctx *gin.Context) {
 	var reqBody CreateSessionReqBody
 	if err := ctx.ShouldBindJSON(&reqBody); err != nil {
@@ -36,7 +37,7 @@ func CreateSession(ctx *gin.Context) {
 	}
 
 	q := database.NewQuery()
-	item, err := q.FindValidationCode(database.DBCtx, queries.FindValidationCodeParams{
+	_, err := q.FindValidationCode(database.DBCtx, queries.FindValidationCodeParams{
 		Email: reqBody.Email,
 		Code:  reqBody.Code,
 	})

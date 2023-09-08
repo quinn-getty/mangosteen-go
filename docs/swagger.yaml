@@ -1,4 +1,10 @@
 basePath: /api/v1
+definitions:
+  controller.CreateSessionResBody:
+    properties:
+      jwt:
+        type: string
+    type: object
 externalDocs:
   description: OpenAPI
   url: https://swagger.io/resources/open-api/
@@ -42,6 +48,23 @@ paths:
       summary: 测试连通性
       tags:
       - test
+  /session:
+    post:
+      consumes:
+      - application/json
+      description: 获取session
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.CreateSessionResBody'
+        "500":
+          description: Internal Server Error
+      summary: session
+      tags:
+      - session
 securityDefinitions:
   BasicAuth(JWT):
     type: basic
