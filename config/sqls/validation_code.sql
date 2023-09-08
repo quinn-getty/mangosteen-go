@@ -12,3 +12,16 @@ FROM
 WHERE
   email = $1;
 
+-- name: FindValidationCode :one
+SELECT
+  *
+FROM
+  validation_codes
+WHERE
+  email = $1
+  AND code = $2
+  AND used_at = NULL
+ORDER BY
+  created_at DESC
+LIMIT 1;
+
