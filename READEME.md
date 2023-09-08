@@ -51,3 +51,21 @@ migrate -database "postgres://mangosteen:123456@pg-for-go-mangosteen:5432/mangos
 ## 更新 user 表字段
 
 migrate create -ext sql -dir config/migrations -seq add_phone_for_users
+
+# 添加 swag
+
+## 全局添加 swag 命令
+
+go install github.com/swaggo/swag/cmd/swag@latest
+
+## init
+
+swag init
+
+## 生成文档
+
+swag init -g internal/router/router.go
+
+## 格式化
+
+swag fmt
