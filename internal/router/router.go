@@ -28,6 +28,7 @@ func New() *gin.Engine {
 	docs.SwaggerInfo.Version = "1.0"
 
 	r.GET("/api/v1/ping", controller.Ping)
+	r.POST("/api/v1/create_validation_code", controller.CreateValidationCode)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	return r
 }

@@ -12,6 +12,21 @@ info:
   title: Swagger Example API
   version: "1.0"
 paths:
+  /create_validation_code:
+    post:
+      consumes:
+      - application/json
+      description: 发送验证码
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "500":
+          description: Internal Server Error
+      summary: 发送验证码
+      tags:
+      - 验证码
   /ping:
     get:
       consumes:
