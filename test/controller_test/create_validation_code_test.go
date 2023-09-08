@@ -8,12 +8,17 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestCreateValidationCode(t *testing.T) {
-	email := "quinnn.gao@gmail.com"
 	r := router.New()
+
+	viper.Set("email.smtp.host", "localhost")
+	viper.Set("email.smtp.port", "1025")
+
+	email := "quinnn.gao@gmail.com"
 	q := database.NewQuery()
 	w := httptest.NewRecorder()
 

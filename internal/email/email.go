@@ -8,13 +8,6 @@ import (
 	"gopkg.in/gomail.v2"
 )
 
-var (
-	EMAIL_SMTP_HOST = viper.GetString("EMAIL_SMTP_HOST")
-	EMAIL_SMTP_PORT = viper.GetString("EMAIL_SMTP_PORT")
-	EMAIL_USER      = viper.GetString("EMAIL_USER")
-	EMAIL_PWD       = viper.GetString("EMAIL_PWD")
-)
-
 func newDialer() *gomail.Dialer {
 	host := viper.GetString("email.smtp.host")
 	port := viper.GetInt("email.smtp.port")

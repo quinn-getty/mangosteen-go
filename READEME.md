@@ -71,3 +71,15 @@ swag init -g internal/router/router.go
 swag fmt
 
 # 将 env.config.json 迁移至 $HOME/.mangosteen/下
+
+# 测试发送邮件
+
+## 全局安装 MailHog
+
+go get github.com/mailhog/MailHog
+
+## 测试之前启动 MailHog 服务
+
+预览地址：http://localhost:8025/#
+
+MailHog
