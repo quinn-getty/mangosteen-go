@@ -9,6 +9,22 @@ import (
 	"context"
 )
 
+const countValidationCodes = `-- name: CountValidationCodes :one
+SELECT
+  count(*)
+FROM
+  validation_codes
+WHERE
+  email = $1
+`
+
+func (q *Queries) CountValidationCodes(ctx context.Context, email string) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countValidationCodes, email)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createValidationCode = `-- name: CreateValidationCode :one
 INSERT INTO validation_codes(email, code)
   VALUES ($1, $2)

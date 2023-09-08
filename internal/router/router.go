@@ -4,6 +4,7 @@ import (
 	"mangosteen/config"
 	"mangosteen/docs"
 	"mangosteen/internal/controller"
+	"mangosteen/internal/database"
 
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
@@ -29,6 +30,7 @@ func New() *gin.Engine {
 
 	r := gin.Default()
 	docs.SwaggerInfo.Version = "1.0"
+	database.Connect()
 
 	r.GET("/api/v1/ping", controller.Ping)
 	r.POST("/api/v1/create_validation_code", controller.CreateValidationCode)

@@ -4,3 +4,11 @@ INSERT INTO validation_codes(email, code)
 RETURNING
   *;
 
+-- name: CountValidationCodes :one
+SELECT
+  count(*)
+FROM
+  validation_codes
+WHERE
+  email = $1;
+

@@ -94,6 +94,11 @@ func MigrateDown() {
 	log.Println("已会退一个版本！")
 }
 
+func NewQuery() *queries.Queries {
+	return queries.New(DB)
+}
+
+// 用户测试
 func Curd() {
 	// 增加
 	q := queries.New(DB)
