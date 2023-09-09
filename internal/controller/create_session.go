@@ -16,7 +16,8 @@ type CreateSessionReqBody struct {
 }
 
 type CreateSessionResBody struct {
-	JWT string `json:"jwt"`
+	JWT    string `json:"jwt"`
+	UserId int32  `json:"userId"`
 }
 
 // 登录 godoc
@@ -47,15 +48,24 @@ func CreateSession(ctx *gin.Context) {
 		ctx.String(http.StatusBadRequest, "验证码错误")
 	}
 
-	jwt, err := jwt_helper.GenerateJWT(1)
+	user, err := q.FindUserByEmail(database.DBCtx, reqBody.Email)
+	if err != nil {
+		user, err = q.CreateUser(database.DBCtx, reqBody.Email)
+		if err != nil {
+			log.Println("创建失败")
+			ctx.String(http.StatusInternalServerError, "稍后重试")
+		}
+	}
 
+	jwt, err := jwt_helper.GenerateJWT(1)
 	if err != nil {
 		log.Println("生成jwt失败")
-		ctx.String(http.StatusInternalServerError, "稍厚重试")
+		ctx.String(http.StatusInternalServerError, "稍后重试")
 	}
 
 	resBody := CreateSessionResBody{
-		JWT: jwt,
+		JWT:    jwt,
+		UserId: user.ID,
 	}
 
 	ctx.JSON(http.StatusOK, resBody)

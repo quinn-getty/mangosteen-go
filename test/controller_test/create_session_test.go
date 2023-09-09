@@ -18,14 +18,22 @@ import (
 )
 
 func TestCreateSession(t *testing.T) {
-	email := "quinnn.gao@gmail.com"
-	code := "123456"
+	email := "xxxxx@xxxxx.com"
+	code := "888888"
 	r := router.New()
 	w := httptest.NewRecorder()
 
 	// 提前插入到数据库
 	q := database.NewQuery()
-	_, err := q.CreateValidationCode(database.DBCtx, queries.CreateValidationCodeParams{
+	user, err := q.FindUserByEmail(database.DBCtx, email)
+	if err != nil {
+		user, err = q.CreateUser(database.DBCtx, email)
+		if err != nil {
+			log.Println("创建失败")
+		}
+	}
+
+	_, err = q.CreateValidationCode(database.DBCtx, queries.CreateValidationCodeParams{
 		Email: email,
 		Code:  code,
 	})
@@ -53,4 +61,5 @@ func TestCreateSession(t *testing.T) {
 	fmt.Println(responsBody.JWT)
 
 	assert.Equal(t, 200, w.Code)
+	assert.Equal(t, user.ID, responsBody.UserId)
 }
