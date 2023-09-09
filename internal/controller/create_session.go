@@ -4,6 +4,7 @@ import (
 	"log"
 	"mangosteen/config/queries"
 	"mangosteen/internal/database"
+	"mangosteen/internal/jwt_helper"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -46,7 +47,12 @@ func CreateSession(ctx *gin.Context) {
 		ctx.String(http.StatusBadRequest, "验证码错误")
 	}
 
-	jwt := ""
+	jwt, err := jwt_helper.GenerateJWT(1)
+
+	if err != nil {
+		log.Println("生成jwt失败")
+		ctx.String(http.StatusInternalServerError, "稍厚重试")
+	}
 
 	resBody := CreateSessionResBody{
 		JWT: jwt,

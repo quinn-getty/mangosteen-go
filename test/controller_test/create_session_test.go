@@ -2,6 +2,7 @@ package controller_test
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"mangosteen/config/queries"
 	"mangosteen/internal/controller"
@@ -48,7 +49,8 @@ func TestCreateSession(t *testing.T) {
 		log.Fatalln(err)
 		t.Error("没有返回jwt")
 	}
-	log.Println(responsBody)
+
+	fmt.Println(responsBody.JWT)
 
 	assert.Equal(t, 200, w.Code)
 }
