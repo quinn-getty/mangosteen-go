@@ -15,7 +15,7 @@ type CreateSessionReqBody struct {
 }
 
 type CreateSessionResBody struct {
-	JWT string `json: "jwt"`
+	JWT string `json:"jwt"`
 }
 
 // 登录 godoc

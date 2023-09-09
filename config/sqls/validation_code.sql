@@ -20,7 +20,7 @@ FROM
 WHERE
   email = $1
   AND code = $2
-  AND used_at = NULL
+  AND useded_at IS NULL
 ORDER BY
   created_at DESC
 LIMIT 1;
