@@ -1,11 +1,15 @@
 package cmd
 
 import (
+	"log"
 	"mangosteen/internal/database"
 	"mangosteen/internal/email"
+	"mangosteen/internal/jwt_helper"
 	"mangosteen/internal/router"
+	"os"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 func Run() {
@@ -28,6 +32,24 @@ func Run() {
 		Run: func(cmd *cobra.Command, args []string) {
 			// RunServer()
 			email.Send()
+		},
+	}
+
+	generateHMACKey := &cobra.Command{
+		Use: "generateHMACKey",
+		Run: func(cmd *cobra.Command, args []string) {
+			bytes, err := jwt_helper.GenerateHMACKey()
+			if err != nil {
+				log.Fatalln("生成generateHMACKey失败")
+			}
+
+			keyPath := viper.GetString("jwt.hmac.key_path")
+
+			if err := os.WriteFile(keyPath, bytes, os.ModePerm); err != nil {
+				log.Fatalln("写入generateHMACKey失败", err)
+			}
+
+			log.Printf("生成generateHMACKey成功，并写入[%s]文件中", keyPath)
 		},
 	}
 
@@ -68,7 +90,7 @@ func Run() {
 	database.Connect()
 	defer database.Close()
 
-	rootCmd.AddCommand(serverCmd, dbCmd, emailCmd)
+	rootCmd.AddCommand(serverCmd, dbCmd, emailCmd, generateHMACKey)
 	dbCmd.AddCommand(dbCreateCmd, dbMigrateCom, dbMigrateDownCom, dbMigrateCreate, dbCurd)
 	rootCmd.Execute()
 }

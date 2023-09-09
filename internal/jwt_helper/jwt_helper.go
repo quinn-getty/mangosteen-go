@@ -3,8 +3,10 @@ package jwt_helper
 import (
 	"crypto/rand"
 	"io"
+	"os"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/spf13/viper"
 )
 
 func GenerateJWT(userId int) (string, error) {
@@ -12,7 +14,7 @@ func GenerateJWT(userId int) (string, error) {
 		"user_id": userId,
 	})
 
-	key, err := generateHMACKey()
+	key, err := getHMACKey()
 	if err != nil {
 		return "", err
 	}
@@ -20,7 +22,12 @@ func GenerateJWT(userId int) (string, error) {
 	return token.SignedString(key)
 }
 
-func generateHMACKey() ([]byte, error) {
+func getHMACKey() ([]byte, error) {
+	keyPath := viper.GetString("jwt.hmac.key_path")
+	return os.ReadFile(keyPath)
+}
+
+func GenerateHMACKey() ([]byte, error) {
 	key := make([]byte, 64)
 	_, err := io.ReadFull(rand.Reader, key)
 	if err != nil {
