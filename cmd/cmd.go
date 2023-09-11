@@ -6,7 +6,9 @@ import (
 	"mangosteen/internal/email"
 	"mangosteen/internal/jwt_helper"
 	"mangosteen/internal/router"
+	"net/http"
 	"os"
+	"os/exec"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -32,6 +34,22 @@ func Run() {
 		Run: func(cmd *cobra.Command, args []string) {
 			// RunServer()
 			email.Send()
+		},
+	}
+
+	coverCmd := &cobra.Command{
+		Use: "cover",
+		Run: func(cmd *cobra.Command, args []string) {
+			if err := os.Mkdir("coverage", os.ModePerm); err != nil {
+				log.Println(err)
+			}
+			if err := exec.Command("go", "test", "-coverprofile=coverage/coverage.out", "./...").Run(); err != nil {
+				log.Fatalln(err)
+			}
+			if err := exec.Command("go", "tool", "cover", "-html=coverage/coverage.out", "-o", "coverage/index.html").Run(); err != nil {
+				log.Fatalln(err)
+			}
+			http.ListenAndServe(":8001", http.FileServer(http.Dir("./coverage")))
 		},
 	}
 
@@ -87,10 +105,11 @@ func Run() {
 			database.Curd()
 		},
 	}
+
 	database.Connect()
 	defer database.Close()
 
-	rootCmd.AddCommand(serverCmd, dbCmd, emailCmd, generateHMACKey)
+	rootCmd.AddCommand(serverCmd, coverCmd, dbCmd, emailCmd, generateHMACKey)
 	dbCmd.AddCommand(dbCreateCmd, dbMigrateCom, dbMigrateDownCom, dbMigrateCreate, dbCurd)
 	rootCmd.Execute()
 }
