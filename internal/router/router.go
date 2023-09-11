@@ -11,6 +11,18 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
+func loadController(rg *gin.RouterGroup) {
+	controllerList := []controller.Controller{
+		&controller.SessionController{},
+		&controller.VaildationCodeController{},
+	}
+
+	for _, c := range controllerList {
+		c.RegisterRouter(rg)
+	}
+
+}
+
 // @title           Swagger Example API
 // @version         1.0
 // @description     This is a sample server celler server.
@@ -34,18 +46,9 @@ func New() *gin.Engine {
 
 	api := r.Group("/api")
 	apiV1 := api.Group("/v1")
-
-	session := controller.SessionController{}
-	session.RegisterRouter(apiV1)
-
-	aildationCode := controller.VaildationCodeController{}
-	aildationCode.RegisterRouter(apiV1)
+	loadController(apiV1)
 
 	r.GET("/api/v1/ping", controller.Ping)
-	// r.POST("/api/v1/create_validation_code", controller.CreateValidationCode)
-	// r.POST("/api/v1/session", controller.CreateSession)
-
-	// swager router
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	return r
 }
