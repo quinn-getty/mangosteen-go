@@ -1,13 +1,12 @@
-package controller_test
+package controller
 
 import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"mangosteen/config"
 	"mangosteen/config/queries"
-	"mangosteen/internal/controller"
 	"mangosteen/internal/database"
-	"mangosteen/internal/router"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -17,14 +16,34 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+var (
+	q *queries.Queries
+	w *httptest.ResponseRecorder
+	r *gin.Engine
+)
+
+func setupTest(t *testing.T) func(t *testing.T) {
+	config.LoadConfig()
+	database.Connect()
+	w = httptest.NewRecorder()
+	q = database.NewQuery()
+
+	r = gin.Default()
+	r.POST("/api/v1/session", CreateSession)
+
+	return func(t *testing.T) {
+		database.Close()
+	}
+}
+
 func TestCreateSession(t *testing.T) {
+	teardownTest := setupTest(t)
+	defer teardownTest(t)
+
 	email := "xxxxx@xxxxx.com"
 	code := "888888"
-	r := router.New()
-	w := httptest.NewRecorder()
 
 	// 提前插入到数据库
-	q := database.NewQuery()
 	user, err := q.FindUserByEmail(database.DBCtx, email)
 	if err != nil {
 		user, err = q.CreateUser(database.DBCtx, email)
@@ -52,7 +71,7 @@ func TestCreateSession(t *testing.T) {
 	req.Header.Set("Content-Type", "application/json")
 	r.ServeHTTP(w, req)
 
-	responsBody := controller.CreateSessionResBody{}
+	responsBody := CreateSessionResBody{}
 	if err = json.Unmarshal(w.Body.Bytes(), &responsBody); err != nil {
 		log.Fatalln(err)
 		t.Error("没有返回jwt")

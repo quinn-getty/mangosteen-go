@@ -83,3 +83,11 @@ go get github.com/mailhog/MailHog
 预览地址：http://localhost:8025/#
 
 MailHog
+
+# 测试覆盖率
+
+go test -coverprofile=coverage.out ./...
+
+## 生成可预览的 html 测试文件
+
+go tool cover -html=coverage.out -o coverage.html
