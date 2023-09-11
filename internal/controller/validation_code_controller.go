@@ -11,6 +11,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type VaildationCodeController struct {
+}
+
 type CreateValidationCodeBody struct {
 	Email string `json:"email" binging:"required,email"`
 }
@@ -24,7 +27,12 @@ type CreateValidationCodeBody struct {
 // @Success      200
 // @Failure      500
 // @Router       /create_validation_code [post]
-func CreateValidationCode(ctx *gin.Context) {
+func (ctrl *VaildationCodeController) RegisterRouter(rg *gin.RouterGroup) {
+	session := rg.Group("/create_validation_code")
+	session.POST("", ctrl.Create)
+}
+
+func (ctrl *VaildationCodeController) Create(ctx *gin.Context) {
 	var body CreateValidationCodeBody
 
 	if err := ctx.ShouldBindJSON(&body); err != nil {
@@ -75,3 +83,8 @@ func generateCode() (string, error) {
 	return string(digits), nil
 
 }
+
+func (ctrl *VaildationCodeController) Delete(c *gin.Context)  {}
+func (ctrl *VaildationCodeController) Update(c *gin.Context)  {}
+func (ctrl *VaildationCodeController) getOne(c *gin.Context)  {}
+func (ctrl *VaildationCodeController) getList(c *gin.Context) {}

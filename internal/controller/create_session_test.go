@@ -29,7 +29,9 @@ func setupTest(t *testing.T) func(t *testing.T) {
 	q = database.NewQuery()
 
 	r = gin.Default()
-	r.POST("/api/v1/session", CreateSession)
+	apiV1 := r.Group("/api/v1")
+	sessionController := SessionController{}
+	sessionController.RegisterRouter(apiV1)
 
 	return func(t *testing.T) {
 		database.Close()
