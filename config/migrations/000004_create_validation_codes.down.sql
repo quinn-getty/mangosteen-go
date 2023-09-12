@@ -1,2 +1,2 @@
-DROP TABLE vaildation_condes;
+DROP TABLE validation_codes;
 
