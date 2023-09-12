@@ -2,10 +2,10 @@ package controller
 
 import (
 	"log"
+	"mangosteen/config/queries"
 	"mangosteen/internal/database"
 	"mangosteen/internal/jwt_helper"
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
@@ -14,52 +14,57 @@ import (
 type MeController struct {
 }
 
+type GetMeResBody struct {
+	Resourse queries.User `json:"resourse"`
+}
+
 func (ctrl *MeController) RegisterRouter(rg *gin.RouterGroup) {
 	me := rg.Group("/me")
-	me.GET(",", ctrl.Get)
+	me.GET("", ctrl.Get)
 }
 
 func (ctrl *MeController) Get(ctx *gin.Context) {
 	auth := ctx.GetHeader(Authorization)
+	if len(auth) < 8 {
+		log.Print("无效的JWT Authorization < 8", auth)
+		ctx.String(http.StatusUnauthorized, "无效的JWT")
+		return
+	}
+
 	jwtString := auth[7:]
 	token, err := jwt_helper.Parse(jwtString)
 	if err != nil {
-		log.Print("无效的JWT", err)
+		log.Print("无效的JWT jwtString jwt_helper.Parse 失败", err)
 		ctx.String(http.StatusUnauthorized, "无效的JWT")
 		return
 	}
 
 	m, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
-		log.Print("无效的JWT", err)
+		log.Print("无效的JWT token.Claims 失败", err)
 		ctx.String(http.StatusUnauthorized, "无效的JWT")
 		return
 	}
 
-	userIdStr, ok := m["user_id"].(string)
-
+	userIdF64, ok := m["user_id"].(float64)
+	userId := int32(userIdF64)
 	if !ok {
-		log.Print("无效的JWT", err)
+		log.Print("无效的JWT userIdStr 获取失败", err)
 		ctx.String(http.StatusUnauthorized, "无效的JWT")
 		return
 	}
-
-	userIdInt64, err := strconv.Atoi(userIdStr)
-	if err != nil {
-		log.Print("无效的JWT", err)
-		ctx.String(http.StatusUnauthorized, "无效的JWT")
-		return
-	}
-
-	userId := int32(userIdInt64)
-	q := database.NewQuery()
 
 	user, err := q.FindUserById(database.DBCtx, userId)
 	if err != nil {
-		log.Print("无效的JWT", err)
+		log.Println(userId)
+		log.Print("无效的JWT FindUserById ", err)
 		ctx.String(http.StatusUnauthorized, "无效的JWT")
 		return
 	}
+
+	// ctx.JSON(http.StatusOK, GetMeResBody{
+	// 	Resourse: user,
+	// })
 
 	ctx.JSON(http.StatusOK, gin.H{
 		"resourse": user,

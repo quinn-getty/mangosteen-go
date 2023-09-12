@@ -2,29 +2,77 @@ package controller
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
-	"mangosteen/config/queries"
 	"mangosteen/internal/database"
+	"mangosteen/internal/jwt_helper"
 	"net/http"
+	"net/http/httptest"
 	"strings"
 	"testing"
 
-	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestMeController(t *testing.T) {
+func TestGet(t *testing.T) {
 	teardownTest := setupTestCase(t)
 	defer teardownTest(t)
-
 	apiV1 := r.Group("/api/v1")
-	sessionController := SessionController{}
-	sessionController.RegisterRouter(apiV1)
+	meController := MeController{}
+	meController.RegisterRouter(apiV1)
 
+	// 不传header
+	req, _ := http.NewRequest("GET", "/api/v1/me", strings.NewReader(""))
+	r.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusUnauthorized, w.Code)
+
+	// 错误header
+	w = httptest.NewRecorder()
+	req, _ = http.NewRequest("GET", "/api/v1/me", strings.NewReader(""))
+	req.Header = http.Header{
+		Authorization: []string{"xxxxxxxxx"},
+	}
+	r.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusUnauthorized, w.Code)
+
+	// 空 header Authorization
+	w = httptest.NewRecorder()
+	jwtString := ""
+	req, _ = http.NewRequest("GET", "/api/v1/me", strings.NewReader(""))
+	req.Header = http.Header{
+		Authorization: []string{"Bearer " + jwtString},
+	}
+	r.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusUnauthorized, w.Code)
+
+	// user_id 错误
+	w = httptest.NewRecorder()
+	jwtString, err := jwt_helper.GenerateJWT(9999999)
+	if err != nil {
+		log.Println(err)
+	}
+	req, _ = http.NewRequest("GET", "/api/v1/me", strings.NewReader(""))
+	req.Header = http.Header{
+		Authorization: []string{"Bearer " + jwtString},
+	}
+	r.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusUnauthorized, w.Code)
+
+	// 加密其他信息
+	w = httptest.NewRecorder()
+	jwtString, err = jwt_helper.GenerateAnyObj(jwt_helper.MapClaims{})
+	if err != nil {
+		log.Println(err)
+	}
+	req, _ = http.NewRequest("GET", "/api/v1/me", strings.NewReader(""))
+	req.Header = http.Header{
+		Authorization: []string{"Bearer " + jwtString},
+	}
+	r.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusUnauthorized, w.Code)
+
+	// header Authorization 正确
+	w = httptest.NewRecorder()
 	email := "xxxxx@xxxxx.com"
-	code := "888888"
-
 	// 提前插入到数据库
 	user, err := q.FindUserByEmail(database.DBCtx, email)
 	if err != nil {
@@ -33,34 +81,24 @@ func TestMeController(t *testing.T) {
 			log.Println("创建失败")
 		}
 	}
-
-	_, err = q.CreateValidationCode(database.DBCtx, queries.CreateValidationCodeParams{
-		Email: email,
-		Code:  code,
-	})
+	jwtString, err = jwt_helper.GenerateJWT(int(user.ID))
 	if err != nil {
-		log.Fatalln(err)
+		log.Println(err)
 	}
-
-	j := gin.H{
-		"email": email,
-		"code":  code,
+	req, _ = http.NewRequest("GET", "/api/v1/me", strings.NewReader(""))
+	req.Header = http.Header{
+		Authorization: []string{"Bearer " + jwtString},
 	}
-
-	bytes, _ := json.Marshal(j)
-
-	req, _ := http.NewRequest("POST", "/api/v1/session", strings.NewReader(string(bytes)))
-	req.Header.Set("Content-Type", "application/json")
 	r.ServeHTTP(w, req)
+	log.Println(w)
+	assert.Equal(t, http.StatusOK, w.Code)
 
-	responsBody := CreateSessionResBody{}
-	if err = json.Unmarshal(w.Body.Bytes(), &responsBody); err != nil {
-		log.Fatalln(err)
-		t.Error("没有返回jwt")
-	}
+	bodyStr := w.Body.String()
+	log.Println(bodyStr)
+	resUser := GetMeResBody{}
+	json.Unmarshal([]byte(bodyStr), &resUser)
+	log.Println(resUser.Resourse.ID)
+	assert.Equal(t, resUser.Resourse.ID, user.ID)
+	assert.Equal(t, resUser.Resourse.Email, user.Email)
 
-	fmt.Println(responsBody.JWT)
-
-	assert.Equal(t, 200, w.Code)
-	assert.Equal(t, user.ID, responsBody.UserId)
 }

@@ -16,6 +16,10 @@ var (
 	r *gin.Engine
 )
 
+/**
+* @desc init q w r
+* @return func(t *testing.T)
+ */
 func setupTestCase(t *testing.T) func(t *testing.T) {
 	config.LoadConfig()
 	database.Connect()

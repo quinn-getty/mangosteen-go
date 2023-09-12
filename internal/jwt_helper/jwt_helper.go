@@ -10,9 +10,15 @@ import (
 )
 
 func GenerateJWT(userId int) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+	return GenerateAnyObj(jwt.MapClaims{
 		"user_id": userId,
 	})
+}
+
+type MapClaims = jwt.MapClaims
+
+func GenerateAnyObj(obj jwt.MapClaims) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, obj)
 
 	key, err := getHMACKey()
 	if err != nil {
