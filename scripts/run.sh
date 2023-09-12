@@ -1,1 +1,1 @@
-swag init -g internal/router/router.go && go build main.go && ./mangosteen server      
+swag init -g internal/router/router.go && go build . && ./mangosteen server      
