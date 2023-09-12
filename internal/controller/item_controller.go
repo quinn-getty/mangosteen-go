@@ -2,6 +2,9 @@ package controller
 
 import (
 	"log"
+	"mangosteen/config/queries"
+	"mangosteen/internal/database"
+	"mangosteen/internal/middleware"
 	"net/http"
 	"time"
 
@@ -17,10 +20,14 @@ func (ctrl *ItemController) RegisterRouter(rg *gin.RouterGroup) {
 }
 
 type CreateItemReq struct {
-	Amount     int       `json:"amount" binding:"required"`
-	Kind       string    `json:"kind" binding:"required"`
-	HappenedAt time.Time `json:"happenedAt" binding:"required"`
-	TagIds     []int32   `json:"tagIds" binding:"required"`
+	Amount     int32        `json:"amount" binding:"required"`
+	Kind       queries.Kind `json:"kind" binding:"required"`
+	HappenedAt time.Time    `json:"happenedAt" binding:"required"`
+	TagIds     []int32      `json:"tagIds" binding:"required"`
+}
+
+type CreateItemRes struct {
+	Resource queries.Item `json:"resource"`
 }
 
 // CreateItem godoc
@@ -40,6 +47,24 @@ func (ctrl *ItemController) Create(c *gin.Context) {
 		c.String(http.StatusUnprocessableEntity, "参数错误")
 		return
 	}
+	user, _ := middleware.GetMe(c)
+	q := database.NewQuery()
+	item, err := q.CreateItem(c, queries.CreateItemParams{
+		UserID:     user.ID,
+		Amount:     req.Amount,
+		Kind:       req.Kind,
+		HappenedAt: req.HappenedAt,
+		TagIds:     req.TagIds,
+	})
+
+	if err != nil {
+		c.String(500, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, CreateItemRes{
+		Resource: item,
+	})
 
 }
 
