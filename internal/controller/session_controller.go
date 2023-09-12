@@ -81,5 +81,5 @@ func (ctrl *SessionController) Create(ctx *gin.Context) {
 
 func (ctrl *SessionController) Delete(c *gin.Context)  {}
 func (ctrl *SessionController) Update(c *gin.Context)  {}
-func (ctrl *SessionController) getOne(c *gin.Context)  {}
+func (ctrl *SessionController) Get(c *gin.Context)     {}
 func (ctrl *SessionController) getList(c *gin.Context) {}

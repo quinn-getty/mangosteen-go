@@ -35,3 +35,13 @@ func GenerateHMACKey() ([]byte, error) {
 	}
 	return key, nil
 }
+
+func Parse(jwtString string) (*jwt.Token, error) {
+	key, err := getHMACKey()
+	if err != nil {
+		return nil, err
+	}
+	return jwt.Parse(jwtString, func(t *jwt.Token) (interface{}, error) {
+		return key, nil
+	})
+}

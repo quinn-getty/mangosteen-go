@@ -7,6 +7,8 @@ type Controller interface {
 	Create(c *gin.Context)
 	Delete(c *gin.Context)
 	Update(c *gin.Context)
-	getOne(c *gin.Context)
+	Get(c *gin.Context)
 	getList(c *gin.Context)
 }
+
+var Authorization = "Authorization"

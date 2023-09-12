@@ -86,5 +86,5 @@ func generateCode() (string, error) {
 
 func (ctrl *VaildationCodeController) Delete(c *gin.Context)  {}
 func (ctrl *VaildationCodeController) Update(c *gin.Context)  {}
-func (ctrl *VaildationCodeController) getOne(c *gin.Context)  {}
+func (ctrl *VaildationCodeController) Get(c *gin.Context)     {}
 func (ctrl *VaildationCodeController) getList(c *gin.Context) {}
