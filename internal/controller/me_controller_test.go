@@ -14,7 +14,7 @@ import (
 )
 
 func TestGet(t *testing.T) {
-	teardownTest := setupTestCase(t)
+	q, w, r, teardownTest := setupTestCase(t)
 	defer teardownTest(t)
 	apiV1 := r.Group("/api/v1")
 	meController := MeController{}
@@ -90,14 +90,11 @@ func TestGet(t *testing.T) {
 		Authorization: []string{"Bearer " + jwtString},
 	}
 	r.ServeHTTP(w, req)
-	log.Println(w)
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	bodyStr := w.Body.String()
-	log.Println(bodyStr)
 	resUser := GetMeResBody{}
 	json.Unmarshal([]byte(bodyStr), &resUser)
-	log.Println(resUser.Resourse.ID)
 	assert.Equal(t, resUser.Resourse.ID, user.ID)
 	assert.Equal(t, resUser.Resourse.Email, user.Email)
 

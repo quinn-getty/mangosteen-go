@@ -1,10 +1,9 @@
 package router
 
 import (
-	"mangosteen/config"
 	"mangosteen/docs"
+	"mangosteen/internal"
 	"mangosteen/internal/controller"
-	"mangosteen/internal/database"
 
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
@@ -38,14 +37,13 @@ func loadController(rg *gin.RouterGroup) {
 // @externalDocs.description  OpenAPI
 // @externalDocs.url          https://swagger.io/resources/open-api/
 func New() *gin.Engine {
-	config.LoadConfig()
-
 	r := gin.Default()
-	docs.SwaggerInfo.Version = "1.0"
-	database.Connect()
+	internal.InitRouter(r)
 
+	docs.SwaggerInfo.Version = "1.0"
 	api := r.Group("/api")
 	apiV1 := api.Group("/v1")
+
 	loadController(apiV1)
 
 	r.GET("/api/v1/ping", controller.Ping)

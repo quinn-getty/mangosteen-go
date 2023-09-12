@@ -15,7 +15,7 @@ import (
 )
 
 func TestCreateSession(t *testing.T) {
-	teardownTest := setupTestCase(t)
+	q, w, r, teardownTest := setupTestCase(t)
 	defer teardownTest(t)
 
 	apiV1 := r.Group("/api/v1")

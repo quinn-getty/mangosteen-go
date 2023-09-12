@@ -1,8 +1,8 @@
 package controller
 
 import (
-	"mangosteen/config"
 	"mangosteen/config/queries"
+	"mangosteen/internal"
 	"mangosteen/internal/database"
 	"net/http/httptest"
 	"testing"
@@ -10,25 +10,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var (
-	q *queries.Queries
-	w *httptest.ResponseRecorder
-	r *gin.Engine
-)
-
 /**
 * @desc init q w r
 * @return func(t *testing.T)
  */
-func setupTestCase(t *testing.T) func(t *testing.T) {
-	config.LoadConfig()
-	database.Connect()
-	w = httptest.NewRecorder()
-	q = database.NewQuery()
+func setupTestCase(t *testing.T) (*queries.Queries, *httptest.ResponseRecorder, *gin.Engine, func(t *testing.T)) {
+	r := gin.Default()
+	internal.InitRouter(r)
 
-	r = gin.Default()
+	w := httptest.NewRecorder()
+	q := database.NewQuery()
 
-	return func(t *testing.T) {
+	return q, w, r, func(t *testing.T) {
 		database.Close()
 	}
 }
