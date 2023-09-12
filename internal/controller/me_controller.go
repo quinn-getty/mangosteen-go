@@ -23,6 +23,15 @@ func (ctrl *MeController) RegisterRouter(rg *gin.RouterGroup) {
 	me.GET("", ctrl.Get)
 }
 
+// GetMe godoc
+// @Summary      获取当前用户
+// @Description  获取当前用户信息
+// @Tags         user
+// @Accept       json
+// @Produce      json
+// @Success      200 {object} GetMeResBody
+// @Failure      500
+// @Router       /me [get]
 func (ctrl *MeController) Get(ctx *gin.Context) {
 	auth := ctx.GetHeader(Authorization)
 	if len(auth) < 8 {

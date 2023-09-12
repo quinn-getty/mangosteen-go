@@ -34,7 +34,6 @@ func (ctrl *SessionController) RegisterRouter(rg *gin.RouterGroup) {
 // @Tags         session
 // @Accept       json
 // @Produce      json
-// @Params request body CreateSessionReqBody true "query params"
 // @Success      200 {object} CreateSessionResBody
 // @Failure      500
 // @Router       /session [post]
