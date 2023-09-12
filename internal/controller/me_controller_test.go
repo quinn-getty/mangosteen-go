@@ -14,7 +14,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestCreateSession(t *testing.T) {
+func TestMeController(t *testing.T) {
 	teardownTest := setupTestCase(t)
 	defer teardownTest(t)
 
