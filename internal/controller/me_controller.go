@@ -2,6 +2,7 @@ package controller
 
 import (
 	"mangosteen/config/queries"
+	"mangosteen/internal/middleware"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -29,9 +30,8 @@ func (ctrl *MeController) RegisterRouter(rg *gin.RouterGroup) {
 // @Failure      500
 // @Router       /me [get]
 func (ctrl *MeController) Get(c *gin.Context) {
-	me, _ := c.Get("me")
+	user, ok := middleware.GetMe(c)
 
-	user, ok := me.(queries.User)
 	if !ok {
 		c.Status(http.StatusUnauthorized)
 		return

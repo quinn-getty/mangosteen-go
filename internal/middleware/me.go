@@ -33,6 +33,12 @@ func Me(whitePaths []string) gin.HandlerFunc {
 	}
 }
 
+func GetMe(c *gin.Context) (queries.User, bool) {
+	me, _ := c.Get("me")
+	user, ok := me.(queries.User)
+	return user, ok
+}
+
 func getMe(ctx *gin.Context) (queries.User, error) {
 	user := queries.User{}
 
