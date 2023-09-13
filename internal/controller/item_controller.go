@@ -43,7 +43,7 @@ func (ctrl *ItemController) Create(c *gin.Context) {
 	req := CreateItemReq{}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		log.Println("入参错误")
+		log.Print("入参错误", err)
 		c.String(http.StatusUnprocessableEntity, "参数错误")
 		return
 	}
