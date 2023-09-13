@@ -22,20 +22,20 @@ func loadController(rg *gin.RouterGroup) {
 
 }
 
-// @title           Swagger Example API
-// @version         1.0
-// @description     This is a sample server celler server.
+//	@title			Swagger Example API
+//	@version		1.0
+//	@description	This is a sample server celler server.
 
-// @license.name  Apache 2.0
-// @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
+//	@license.name	Apache 2.0
+//	@license.url	http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @host      localhost:8080
-// @BasePath  /api/v1
+//	@host		localhost:8080
+//	@BasePath	/api/v1
 
-// @securityDefinitions.basic  BasicAuth(JWT)
+//	@securityDefinitions.basic	BasicAuth(JWT)
 
-// @externalDocs.description  OpenAPI
-// @externalDocs.url          https://swagger.io/resources/open-api/
+//	@externalDocs.description	OpenAPI
+//	@externalDocs.url			https://swagger.io/resources/open-api/
 func New() *gin.Engine {
 	r := gin.Default()
 	internal.InitRouter(r)

@@ -21,14 +21,14 @@ func (ctrl *MeController) RegisterRouter(rg *gin.RouterGroup) {
 }
 
 // GetMe godoc
-// @Summary      获取当前用户
-// @Description  获取当前用户信息
-// @Tags         user
-// @Accept       json
-// @Produce      json
-// @Success      200 {object} GetMeResBody
-// @Failure      500
-// @Router       /me [get]
+//	@Summary		获取当前用户
+//	@Description	获取当前用户信息
+//	@Tags			user
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	GetMeResBody
+//	@Failure		500
+//	@Router			/me [get]
 func (ctrl *MeController) Get(c *gin.Context) {
 	user, ok := middleware.GetMe(c)
 

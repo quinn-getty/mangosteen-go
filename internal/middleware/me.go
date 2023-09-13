@@ -7,6 +7,7 @@ import (
 	"mangosteen/internal/database"
 	"mangosteen/internal/jwt_helper"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -14,10 +15,12 @@ import (
 func Me(whitePaths []string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		path := c.Request.URL.Path
-		index := indexOf(whitePaths, path)
-		if index != -1 {
-			c.Next()
-			return
+
+		for _, s := range whitePaths {
+			if has := strings.HasPrefix(path, s); has {
+				c.Next()
+				return
+			}
 		}
 
 		user, err := getMe(c)
@@ -84,13 +87,4 @@ func getMe(ctx *gin.Context) (queries.User, error) {
 		return user, fmt.Errorf("无效的JWT")
 	}
 	return user, nil
-}
-
-func indexOf(list []string, str string) int {
-	for i, s := range list {
-		if s == str {
-			return i
-		}
-	}
-	return -1
 }

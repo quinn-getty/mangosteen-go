@@ -31,14 +31,15 @@ type CreateItemRes struct {
 }
 
 // CreateItem godoc
-// @Summary      创建item
-// @Description  创建item
-// @Tags         item
-// @Accept       json
-// @Produce      json
-// @Success      200
-// @Failure      500
-// @Router       /item [post]
+//
+//	@Summary		创建item
+//	@Description	创建item
+//	@Tags			item
+//	@Accept			json
+//	@Produce		json
+//	@Param			body		body		CreateItemReq			true	"body参数"
+//	@Success		200			{object}	CreateItemRes
+//	@Router			/item [post]
 func (ctrl *ItemController) Create(c *gin.Context) {
 	req := CreateItemReq{}
 

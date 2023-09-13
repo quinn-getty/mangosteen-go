@@ -12,6 +12,7 @@ func InitRouter(r *gin.Engine) {
 	config.LoadConfig()
 	database.Connect()
 	r.Use(middleware.Me([]string{
+		"/swagger",
 		"/api/v1/ping",
 		"/api/v1/session",
 		"/api/v1/create_validation_code",

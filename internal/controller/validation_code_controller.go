@@ -19,14 +19,14 @@ type CreateValidationCodeBody struct {
 }
 
 // 发送验证码 godoc
-// @Summary      发送验证码
-// @Description  发送验证码
-// @Tags         验证码
-// @Accept       json
-// @Produce      json
-// @Success      200
-// @Failure      500
-// @Router       /create_validation_code [post]
+//	@Summary		发送验证码
+//	@Description	发送验证码
+//	@Tags			验证码
+//	@Accept			json
+//	@Produce		json
+//	@Success		200
+//	@Failure		500
+//	@Router			/create_validation_code [post]
 func (ctrl *VaildationCodeController) RegisterRouter(rg *gin.RouterGroup) {
 	session := rg.Group("/create_validation_code")
 	session.POST("", ctrl.Create)
