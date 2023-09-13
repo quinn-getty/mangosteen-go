@@ -37,8 +37,8 @@ type CreateItemRes struct {
 //	@Tags			item
 //	@Accept			json
 //	@Produce		json
-//	@Param			body		body		CreateItemReq			true	"body参数"
-//	@Success		200			{object}	CreateItemRes
+//	@Param			body	body		CreateItemReq	true	"body参数"
+//	@Success		200		{object}	CreateItemRes
 //	@Router			/item [post]
 func (ctrl *ItemController) Create(c *gin.Context) {
 	req := CreateItemReq{}

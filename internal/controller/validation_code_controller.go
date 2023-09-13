@@ -18,15 +18,20 @@ type CreateValidationCodeBody struct {
 	Email string `json:"email" binging:"required,email"`
 }
 
+type CreateValidationCodeRes struct{}
+
 // 发送验证码 godoc
+//
 //	@Summary		发送验证码
 //	@Description	发送验证码
-//	@Tags			验证码
+//	@Tags			登录鉴权
 //	@Accept			json
 //	@Produce		json
-//	@Success		200
-//	@Failure		500
-//	@Router			/create_validation_code [post]
+//
+// @Param body body CreateValidationCodeBody true "body 参数"
+// @Success		200	 {object}	CreateValidationCodeRes "相应数据"
+// @Failure		500
+// @Router			/create_validation_code [post]
 func (ctrl *VaildationCodeController) RegisterRouter(rg *gin.RouterGroup) {
 	session := rg.Group("/create_validation_code")
 	session.POST("", ctrl.Create)
@@ -63,7 +68,7 @@ func (ctrl *VaildationCodeController) Create(ctx *gin.Context) {
 		log.Println("发送邮件失败")
 		ctx.String(http.StatusInternalServerError, "发送失败")
 	}
-	ctx.String(http.StatusOK, "发送成功")
+	ctx.JSON(http.StatusOK, CreateValidationCodeRes{})
 }
 
 func generateCode() (string, error) {

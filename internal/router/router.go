@@ -14,6 +14,7 @@ func loadController(rg *gin.RouterGroup) {
 	controllerList := []controller.Controller{
 		&controller.SessionController{},
 		&controller.VaildationCodeController{},
+		&controller.MeController{},
 	}
 
 	for _, c := range controllerList {
@@ -32,10 +33,12 @@ func loadController(rg *gin.RouterGroup) {
 //	@host		localhost:8080
 //	@BasePath	/api/v1
 
-//	@securityDefinitions.basic	BasicAuth(JWT)
+//	@securityDefinitions.apiKey	Bearer
+//	@in							header
+//	@name						Authorization
 
-//	@externalDocs.description	OpenAPI
-//	@externalDocs.url			https://swagger.io/resources/open-api/
+// @externalDocs.description	OpenAPI
+// @externalDocs.url			https://swagger.io/resources/open-api/
 func New() *gin.Engine {
 	r := gin.Default()
 	internal.InitRouter(r)

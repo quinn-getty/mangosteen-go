@@ -21,11 +21,15 @@ func (ctrl *MeController) RegisterRouter(rg *gin.RouterGroup) {
 }
 
 // GetMe godoc
+//
 //	@Summary		获取当前用户
 //	@Description	获取当前用户信息
-//	@Tags			user
+//	@Tags			登录鉴权
 //	@Accept			json
 //	@Produce		json
+//
+//	@Security	Bearer
+//
 //	@Success		200	{object}	GetMeResBody
 //	@Failure		500
 //	@Router			/me [get]

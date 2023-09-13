@@ -28,15 +28,17 @@ func (ctrl *SessionController) RegisterRouter(rg *gin.RouterGroup) {
 	session.POST("", ctrl.Create)
 }
 
-// 登录 godoc
-//	@Summary		session
-//	@Description	获取session
-//	@Tags			session
-//	@Accept			json
-//	@Produce		json
-//	@Success		200	{object}	CreateSessionResBody
-//	@Failure		500
-//	@Router			/session [post]
+//	login godoc
+//
+// @Summary		session
+// @Description	获取session
+// @Tags			登录鉴权
+// @Accept			json
+// @Produce		json
+// @Param			body	body		CreateSessionReqBody	true	"body参数"
+// @Success		200		{object}	CreateSessionResBody
+// @Failure		500
+// @Router			/session [post]
 func (ctrl *SessionController) Create(ctx *gin.Context) {
 	var reqBody CreateSessionReqBody
 	if err := ctx.ShouldBindJSON(&reqBody); err != nil {
