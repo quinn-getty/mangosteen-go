@@ -96,3 +96,28 @@ func TestCreateItemWithError(t *testing.T) {
 	assert.Equal(t, http.StatusUnprocessableEntity, w.Code)
 
 }
+
+func TestListItem(t *testing.T) {
+	q, w, r, teardownTest := setupTestCase(t)
+	defer teardownTest(t)
+	apiV1 := r.Group("/api/v1")
+	itemController := ItemController{}
+	itemController.RegisterRouter(apiV1)
+
+	_, jwtString, err := getUsereAndJwt(q)
+	if err != nil {
+		log.Println(err)
+	}
+
+	req, _ := http.NewRequest(
+		"get",
+		"/api/v1/item",
+		nil,
+	)
+
+	req.Header = http.Header{
+		Authorization: []string{"Bearer " + jwtString},
+	}
+	r.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+}

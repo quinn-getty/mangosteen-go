@@ -10,11 +10,12 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-func loadController(rg *gin.RouterGroup) {
+func LoadController(rg *gin.RouterGroup) {
 	controllerList := []controller.Controller{
 		&controller.SessionController{},
 		&controller.VaildationCodeController{},
 		&controller.MeController{},
+		&controller.ItemController{},
 	}
 
 	for _, c := range controllerList {
@@ -47,7 +48,7 @@ func New() *gin.Engine {
 	api := r.Group("/api")
 	apiV1 := api.Group("/v1")
 
-	loadController(apiV1)
+	LoadController(apiV1)
 
 	r.GET("/api/v1/ping", controller.Ping)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

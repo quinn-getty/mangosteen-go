@@ -28,10 +28,10 @@ type CreateValidationCodeRes struct{}
 //	@Accept			json
 //	@Produce		json
 //
-// @Param body body CreateValidationCodeBody true "body 参数"
-// @Success		200	 {object}	CreateValidationCodeRes "相应数据"
-// @Failure		500
-// @Router			/create_validation_code [post]
+//	@Param			body	body		CreateValidationCodeBody	true	"body 参数"
+//	@Success		200		{object}	CreateValidationCodeRes		"相应数据"
+//	@Failure		500
+//	@Router			/create_validation_code [post]
 func (ctrl *VaildationCodeController) RegisterRouter(rg *gin.RouterGroup) {
 	session := rg.Group("/create_validation_code")
 	session.POST("", ctrl.Create)

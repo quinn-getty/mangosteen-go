@@ -12,6 +12,22 @@ import (
 	"github.com/lib/pq"
 )
 
+const countItem = `-- name: CountItem :one
+SELECT
+  count(*)
+FROM
+  items
+WHERE
+  user_id = $1
+`
+
+func (q *Queries) CountItem(ctx context.Context, userID int32) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countItem, userID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createItem = `-- name: CreateItem :one
 INSERT INTO items(user_id, amount, kind, happened_at, tag_ids)
   VALUES ($1, $2, $3, $4, $5)
@@ -47,4 +63,64 @@ func (q *Queries) CreateItem(ctx context.Context, arg CreateItemParams) (Item, e
 		&i.UpdatedAt,
 	)
 	return i, err
+}
+
+const listItem = `-- name: ListItem :many
+SELECT
+  id, user_id, amount, tag_ids, kind, happened_at, created_at, updated_at
+FROM
+  items
+WHERE
+  user_id = $1
+  AND happened_at >= $2
+  AND happened_at <= $3
+ORDER BY
+  happened_at DESC offset $4
+LIMIT $5
+`
+
+type ListItemParams struct {
+	UserID       int32     `json:"userId"`
+	HappenedAt   time.Time `json:"happenedAt"`
+	HappenedAt_2 time.Time `json:"happenedAt2"`
+	Offset       int32     `json:"offset"`
+	Limit        int32     `json:"limit"`
+}
+
+func (q *Queries) ListItem(ctx context.Context, arg ListItemParams) ([]Item, error) {
+	rows, err := q.db.QueryContext(ctx, listItem,
+		arg.UserID,
+		arg.HappenedAt,
+		arg.HappenedAt_2,
+		arg.Offset,
+		arg.Limit,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Item
+	for rows.Next() {
+		var i Item
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.Amount,
+			pq.Array(&i.TagIds),
+			&i.Kind,
+			&i.HappenedAt,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }

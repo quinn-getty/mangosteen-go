@@ -28,7 +28,7 @@ func (ctrl *MeController) RegisterRouter(rg *gin.RouterGroup) {
 //	@Accept			json
 //	@Produce		json
 //
-//	@Security	Bearer
+//	@Security		Bearer
 //
 //	@Success		200	{object}	GetMeResBody
 //	@Failure		500
