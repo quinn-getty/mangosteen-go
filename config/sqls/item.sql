@@ -11,8 +11,8 @@ FROM
   items
 WHERE
   user_id = $1
-  -- AND happened_at >= $2
-  -- AND happened_at <= $3
+  AND happened_at >= sqlc.arg(happened_at_begin)
+  AND happened_at <= sqlc.arg(happened_at_end)
 ORDER BY
   happened_at DESC offset $2
 LIMIT $3;

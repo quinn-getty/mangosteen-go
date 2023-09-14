@@ -91,8 +91,8 @@ type ItemGetListRes struct {
 type ItemGetListReq struct {
 	Current         int32     `json:"current" binding:"required"`
 	Size            int32     `json:"size" binding:"required"`
-	HappenenAtBegin time.Time `json:"happenenAtBegin" `
-	HappenenAtEnd   time.Time `json:"happenenAtEnd" `
+	HappenedAtBegin time.Time `json:"happenedAtBegin" `
+	HappenedAtEnd   time.Time `json:"happenedAtEnd" `
 }
 
 // ItemList godoc
@@ -110,15 +110,12 @@ func (ctrl *ItemController) getList(c *gin.Context) {
 	params := ItemGetListReq{}
 	user, ok := middleware.GetMe(c)
 
-	var offset int32
-
 	currentStr, _ := c.GetQuery("current")
 	if current, err := strconv.Atoi(currentStr); err == nil {
-		params.Current = int32(current)
-		if current == 1 {
-			offset = 0
+		if current == 0 {
+			params.Current = 1
 		} else {
-			offset = int32(current)
+			params.Current = int32(current)
 		}
 	}
 
@@ -127,18 +124,22 @@ func (ctrl *ItemController) getList(c *gin.Context) {
 		params.Size = int32(size)
 	}
 
-	happenenAtBeginStr, _ := c.GetQuery("happenenAtBegin")
-	if happenenAtBegin, err := time.Parse(time.RFC3339, happenenAtBeginStr); err != nil {
-		params.HappenenAtBegin = happenenAtBegin
+	happenedAtBeginStr, _ := c.GetQuery("happenedAtBegin")
+	if happenedAtBeginStr == "" {
+		params.HappenedAtBegin = time.Now().AddDate(-100, 0, 0)
+	} else if happenedAtBegin, err := time.Parse(time.RFC3339, happenedAtBeginStr); err != nil {
+		params.HappenedAtBegin = happenedAtBegin
 	} else {
-		params.HappenenAtBegin = time.Now().AddDate(-100, 0, 0)
+		params.HappenedAtBegin = time.Now().AddDate(-100, 0, 0)
 	}
 
-	happenenAtEndStr, _ := c.GetQuery("happenenAtEnd")
-	if happenenAtEnd, err := time.Parse(time.RFC3339, happenenAtEndStr); err != nil {
-		params.HappenenAtEnd = happenenAtEnd
+	happenedAtEndStr, _ := c.GetQuery("happenedAtEnd")
+	if happenedAtEndStr == "" {
+		params.HappenedAtEnd = time.Now().AddDate(0, 0, 1)
+	} else if happenedAtEnd, err := time.Parse(time.RFC3339, happenedAtEndStr); err != nil {
+		params.HappenedAtEnd = happenedAtEnd
 	} else {
-		params.HappenenAtEnd = time.Now().AddDate(0, 0, 1)
+		params.HappenedAtEnd = time.Now().AddDate(0, 0, 1)
 	}
 
 	if !ok {
@@ -153,17 +154,21 @@ func (ctrl *ItemController) getList(c *gin.Context) {
 		return
 	}
 
+	log.Println(params)
+
 	list, err := q.ListItem(c, queries.ListItemParams{
-		UserID: user.ID,
-		Offset: offset * params.Size,
-		Limit:  params.Size,
-		// HappenedAt:   params.HappenenAtEnd,
-		// HappenedAt_2: params.HappenenAtEnd,
+		UserID:          user.ID,
+		Offset:          (params.Current - 1) * params.Size,
+		Limit:           params.Size,
+		HappenedAtBegin: params.HappenedAtBegin,
+		HappenedAtEnd:   params.HappenedAtEnd,
 	})
 	if err != nil {
 		c.String(http.StatusInternalServerError, "服务器繁忙")
 		return
 	}
+
+	log.Println(list)
 
 	res := ItemGetListRes{
 		Resourses: list,
