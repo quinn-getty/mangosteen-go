@@ -127,13 +127,19 @@ func (ctrl *ItemController) getList(c *gin.Context) {
 		params.Size = int32(size)
 	}
 
-	// happenenAtBegin, err := time.Parse(time.RFC3339, dateString)
-	// if err != nil {
-	// 	fmt.Println("解析日期时间出错:", err)
-	// 	return
-	// }
-	// happenenAtBeginStr, _ := c.GetQuery("happenenAtBegin")
-	// happenenAtEndStr, _ := c.GetQuery("happenenAtEnd")
+	happenenAtBeginStr, _ := c.GetQuery("happenenAtBegin")
+	if happenenAtBegin, err := time.Parse(time.RFC3339, happenenAtBeginStr); err != nil {
+		params.HappenenAtBegin = happenenAtBegin
+	} else {
+		params.HappenenAtBegin = time.Now().AddDate(-100, 0, 0)
+	}
+
+	happenenAtEndStr, _ := c.GetQuery("happenenAtEnd")
+	if happenenAtEnd, err := time.Parse(time.RFC3339, happenenAtEndStr); err != nil {
+		params.HappenenAtEnd = happenenAtEnd
+	} else {
+		params.HappenenAtEnd = time.Now().AddDate(0, 0, 1)
+	}
 
 	if !ok {
 		c.Status(http.StatusUnauthorized)
@@ -151,8 +157,8 @@ func (ctrl *ItemController) getList(c *gin.Context) {
 		UserID: user.ID,
 		Offset: offset * params.Size,
 		Limit:  params.Size,
-		// HappenedAt: ,
-		// HappenedAt_2: ,
+		// HappenedAt:   params.HappenenAtEnd,
+		// HappenedAt_2: params.HappenenAtEnd,
 	})
 	if err != nil {
 		c.String(http.StatusInternalServerError, "服务器繁忙")

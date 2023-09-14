@@ -72,29 +72,21 @@ FROM
   items
 WHERE
   user_id = $1
-  AND happened_at >= $2
-  AND happened_at <= $3
+  -- AND happened_at >= $2
+  -- AND happened_at <= $3
 ORDER BY
-  happened_at DESC offset $4
-LIMIT $5
+  happened_at DESC offset $2
+LIMIT $3
 `
 
 type ListItemParams struct {
-	UserID       int32     `json:"userId"`
-	HappenedAt   time.Time `json:"happenedAt"`
-	HappenedAt_2 time.Time `json:"happenedAt2"`
-	Offset       int32     `json:"offset"`
-	Limit        int32     `json:"limit"`
+	UserID int32 `json:"userId"`
+	Offset int32 `json:"offset"`
+	Limit  int32 `json:"limit"`
 }
 
 func (q *Queries) ListItem(ctx context.Context, arg ListItemParams) ([]Item, error) {
-	rows, err := q.db.QueryContext(ctx, listItem,
-		arg.UserID,
-		arg.HappenedAt,
-		arg.HappenedAt_2,
-		arg.Offset,
-		arg.Limit,
-	)
+	rows, err := q.db.QueryContext(ctx, listItem, arg.UserID, arg.Offset, arg.Limit)
 	if err != nil {
 		return nil, err
 	}

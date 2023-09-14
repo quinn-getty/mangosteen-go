@@ -11,11 +11,11 @@ FROM
   items
 WHERE
   user_id = $1
-  AND happened_at >= $2
-  AND happened_at <= $3
+  -- AND happened_at >= $2
+  -- AND happened_at <= $3
 ORDER BY
-  happened_at DESC offset $4
-LIMIT $5;
+  happened_at DESC offset $2
+LIMIT $3;
 
 -- name: CountItem :one
 SELECT

@@ -7,6 +7,7 @@ import (
 	"mangosteen/internal/database"
 	"mangosteen/internal/jwt_helper"
 	"net/http"
+	"net/url"
 	"strings"
 	"testing"
 
@@ -30,7 +31,7 @@ func getUsereAndJwt(q *queries.Queries) (queries.User, string, error) {
 	return user, jwtString, err
 }
 
-func TestCreateItem(t *testing.T) {
+func TestCreateItemWithSuccess(t *testing.T) {
 	q, w, r, teardownTest := setupTestCase(t)
 	defer teardownTest(t)
 	apiV1 := r.Group("/api/v1")
@@ -109,15 +110,46 @@ func TestListItem(t *testing.T) {
 		log.Println(err)
 	}
 
-	req, _ := http.NewRequest(
+	req1, _ := http.NewRequest(
 		"GET",
 		"/api/v1/item",
 		nil,
 	)
 
-	req.Header = http.Header{
+	// 生成一个item
+	// for i := 0; i < 10; i++ {
+	// 	q.CreateItem(database.DBCtx, queries.CreateItemParams{
+	// 		UserID:     user.ID,
+	// 		Amount:     1000,
+	// 		Kind:       "expenses",
+	// 		HappenedAt: time.Now(),
+	// 		TagIds:     []int32{1, 2, 3},
+	// 	})
+	// }
+
+	// database, err := q.ListItem(database.DBCtx, queries.ListItemParams{
+	// 	UserID: int32(user.ID),
+	// 	// HappenedAt   time.Time `json:"happenedAt"`
+	// 	// HappenedAt_2 time.Time `json:"happenedAt2"`
+	// 	Offset: 0,
+	// 	Limit:  5,
+	// })
+
+	query := url.Values{}
+	query.Add("size", "5")
+	query.Add("current", "1")
+	req1.URL.RawQuery = query.Encode()
+
+	req1.Header = http.Header{
 		Authorization: []string{"Bearer " + jwtString},
 	}
-	r.ServeHTTP(w, req)
+	r.ServeHTTP(w, req1)
+
 	assert.Equal(t, http.StatusOK, w.Code)
+
+	res := ItemGetListRes{}
+	bodyStr := w.Body.String()
+	json.Unmarshal([]byte(bodyStr), &res)
+	log.Println(res.Resourses)
+	assert.Equal(t, len(res.Resourses), 5)
 }
