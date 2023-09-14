@@ -64,7 +64,6 @@ func TestCreateItem(t *testing.T) {
 	json.Unmarshal([]byte(bodyStr), &resItem)
 	assert.Equal(t, resItem.Resource.UserID, user.ID)
 	assert.Equal(t, int32(100), resItem.Resource.Amount)
-
 }
 
 func TestCreateItemWithError(t *testing.T) {
@@ -100,17 +99,18 @@ func TestCreateItemWithError(t *testing.T) {
 func TestListItem(t *testing.T) {
 	q, w, r, teardownTest := setupTestCase(t)
 	defer teardownTest(t)
-	apiV1 := r.Group("/api/v1")
+	// 生成路由
 	itemController := ItemController{}
-	itemController.RegisterRouter(apiV1)
+	itemController.RegisterRouter(r.Group("/api/v1"))
 
+	// 获取测试账户jwt
 	_, jwtString, err := getUsereAndJwt(q)
 	if err != nil {
 		log.Println(err)
 	}
 
 	req, _ := http.NewRequest(
-		"get",
+		"GET",
 		"/api/v1/item",
 		nil,
 	)
