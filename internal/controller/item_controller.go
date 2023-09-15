@@ -86,6 +86,8 @@ type Pager struct {
 type ItemGetListRes struct {
 	Resourses []queries.Item `json:"resourses"`
 	Pager     Pager          `json:"pager"`
+	Income    int32          `json:"inCome"`
+	Expenses  int32          `json:"expenses"`
 }
 
 type ItemGetListReq struct {
@@ -148,13 +150,58 @@ func (ctrl *ItemController) getList(c *gin.Context) {
 	}
 
 	q := database.NewQuery()
+
+	res := ItemGetListRes{
+		Resourses: []queries.Item{},
+		Pager: Pager{
+			Current: params.Current,
+			Size:    params.Size,
+			Total:   0,
+		},
+		Income:   0,
+		Expenses: 0,
+	}
+
 	count, err := q.CountItem(c, user.ID)
 	if err != nil {
 		c.String(http.StatusInternalServerError, "服务器繁忙")
 		return
 	}
+	res.Pager.Total = count
 
-	log.Println(params)
+	income, err := q.ItemsBalance(database.DBCtx, queries.ItemsBalanceParams{
+		UserID:          user.ID,
+		HappenedAtBegin: params.HappenedAtBegin,
+		HappenedAtEnd:   params.HappenedAtEnd,
+		Kind:            queries.KindInCome,
+	})
+
+	for _, i := range income {
+		res.Income += i
+	}
+
+	if err != nil {
+		log.Print("查询income ", err)
+		c.String(http.StatusInternalServerError, "服务器繁忙")
+		return
+	}
+
+	expenses, err := q.ItemsBalance(database.DBCtx, queries.ItemsBalanceParams{
+		UserID:          user.ID,
+		HappenedAtBegin: params.HappenedAtBegin,
+		HappenedAtEnd:   params.HappenedAtEnd,
+		Kind:            queries.KindExpenses,
+	})
+	if err != nil {
+		// expenses = 0
+		log.Print("查询expenses", err)
+		c.String(http.StatusInternalServerError, "服务器繁忙")
+		return
+	}
+
+	for _, i := range expenses {
+		res.Expenses += i
+	}
 
 	list, err := q.ListItem(c, queries.ListItemParams{
 		UserID:          user.ID,
@@ -167,17 +214,7 @@ func (ctrl *ItemController) getList(c *gin.Context) {
 		c.String(http.StatusInternalServerError, "服务器繁忙")
 		return
 	}
-
-	log.Println(list)
-
-	res := ItemGetListRes{
-		Resourses: list,
-		Pager: Pager{
-			Current: params.Current,
-			Size:    params.Size,
-			Total:   count,
-		},
-	}
+	res.Resourses = list
 
 	c.JSON(http.StatusOK, res)
 }

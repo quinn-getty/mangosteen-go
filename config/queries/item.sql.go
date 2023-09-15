@@ -65,6 +65,54 @@ func (q *Queries) CreateItem(ctx context.Context, arg CreateItemParams) (Item, e
 	return i, err
 }
 
+const itemsBalance = `-- name: ItemsBalance :many
+SELECT
+  amount
+  -- SUM(amount)
+FROM
+  items
+WHERE
+  kind = $1
+  AND user_id = $2
+  AND happened_at >= $3
+  AND happened_at < $4
+`
+
+type ItemsBalanceParams struct {
+	Kind            Kind      `json:"kind"`
+	UserID          int32     `json:"userId"`
+	HappenedAtBegin time.Time `json:"happenedAtBegin"`
+	HappenedAtEnd   time.Time `json:"happenedAtEnd"`
+}
+
+func (q *Queries) ItemsBalance(ctx context.Context, arg ItemsBalanceParams) ([]int32, error) {
+	rows, err := q.db.QueryContext(ctx, itemsBalance,
+		arg.Kind,
+		arg.UserID,
+		arg.HappenedAtBegin,
+		arg.HappenedAtEnd,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []int32
+	for rows.Next() {
+		var amount int32
+		if err := rows.Scan(&amount); err != nil {
+			return nil, err
+		}
+		items = append(items, amount)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listItem = `-- name: ListItem :many
 SELECT
   id, user_id, amount, tag_ids, kind, happened_at, created_at, updated_at
@@ -73,7 +121,7 @@ FROM
 WHERE
   user_id = $1
   AND happened_at >= $4
-  AND happened_at <= $5
+  AND happened_at < $5
 ORDER BY
   happened_at DESC offset $2
 LIMIT $3

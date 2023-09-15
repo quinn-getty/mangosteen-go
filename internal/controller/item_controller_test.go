@@ -94,7 +94,6 @@ func TestCreateItemWithError(t *testing.T) {
 	}
 	r.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusUnprocessableEntity, w.Code)
-
 }
 
 func TestListItem(t *testing.T) {
@@ -116,18 +115,18 @@ func TestListItem(t *testing.T) {
 		nil,
 	)
 
-	// 生成一个item
-	// for i := 0; i < 10; i++ {
+	// // 生成一个item
+	// for i := 0; i < 5; i++ {
 	// 	q.CreateItem(database.DBCtx, queries.CreateItemParams{
 	// 		UserID:     user.ID,
 	// 		Amount:     1000,
-	// 		Kind:       "expenses",
+	// 		Kind:       "in_come",
 	// 		HappenedAt: time.Now(),
 	// 		TagIds:     []int32{1, 2, 3},
 	// 	})
 	// }
 
-	// database, err := q.ListItem(database.DBCtx, queries.ListItemParams{
+	// q.ListItem(database.DBCtx, queries.ListItemParams{
 	// 	UserID: int32(user.ID),
 	// 	// HappenedAt   time.Time `json:"happenedAt"`
 	// 	// HappenedAt_2 time.Time `json:"happenedAt2"`
@@ -138,6 +137,7 @@ func TestListItem(t *testing.T) {
 	query := url.Values{}
 	query.Add("size", "5")
 	query.Add("current", "1")
+
 	req1.URL.RawQuery = query.Encode()
 
 	req1.Header = http.Header{

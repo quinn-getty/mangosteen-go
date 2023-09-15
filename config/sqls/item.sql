@@ -12,7 +12,7 @@ FROM
 WHERE
   user_id = $1
   AND happened_at >= sqlc.arg(happened_at_begin)
-  AND happened_at <= sqlc.arg(happened_at_end)
+  AND happened_at < sqlc.arg(happened_at_end)
 ORDER BY
   happened_at DESC offset $2
 LIMIT $3;
@@ -24,4 +24,16 @@ FROM
   items
 WHERE
   user_id = $1;
+
+-- name: ItemsBalance :many
+SELECT
+  amount
+  -- SUM(amount)
+FROM
+  items
+WHERE
+  kind = $1
+  AND user_id = $2
+  AND happened_at >= sqlc.arg(happened_at_begin)
+  AND happened_at < sqlc.arg(happened_at_end);
 
