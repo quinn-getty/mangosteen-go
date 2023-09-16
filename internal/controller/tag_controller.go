@@ -13,6 +13,12 @@ import (
 type TagController struct {
 }
 
+func (ctrl *TagController) RegisterRouter(rg *gin.RouterGroup) {
+	item := rg.Group("/tag")
+	item.POST("", ctrl.Create)
+	item.GET("", ctrl.getList)
+}
+
 type CreateTagReq struct {
 	Sign string `json:"sign" binding:"required"`
 	Name string `json:"name" binding:"required"`
@@ -60,7 +66,34 @@ func (ctrl *TagController) Create(c *gin.Context) {
 	})
 }
 
-func (ctrl *TagController) Delete(c *gin.Context)  {}
-func (ctrl *TagController) Update(c *gin.Context)  {}
-func (ctrl *TagController) Get(c *gin.Context)     {}
-func (ctrl *TagController) getList(c *gin.Context) {}
+func (ctrl *TagController) Delete(c *gin.Context) {}
+func (ctrl *TagController) Update(c *gin.Context) {}
+func (ctrl *TagController) Get(c *gin.Context)    {}
+
+type TagListReq struct{}
+
+type TagListRes struct {
+	Resource []queries.Tag `json:"resource"`
+}
+
+// TagList godoc
+//
+//	@Summary		tag list
+//	@Description	创建 list
+//	@Security		Beare
+//	@Tags			tag
+//	@Accept			json
+//	@Produce		json
+//	@Param			body	body		TagListReq	true	"body参数"
+//	@Success		200		{object}	TagListRes
+//	@Router			/tag [get]
+func (ctrl *TagController) getList(c *gin.Context) {
+	// user, _ := middleware.GetMe(c)
+	// q := database.NewQuery()
+	// item, err := q.CreateTag(c, queries.CreateTagParams{
+	// 	UserID: user.ID,
+	// 	Name:   req.Name,
+	// 	Sign:   req.Sign,
+	// })
+
+}

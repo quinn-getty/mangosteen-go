@@ -5,7 +5,6 @@ import (
 	"log"
 	"mangosteen/config/queries"
 	"mangosteen/internal/database"
-	"mangosteen/internal/jwt_helper"
 	"net/http"
 	"net/url"
 	"strings"
@@ -14,23 +13,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 )
-
-func getUsereAndJwt(q *queries.Queries) (queries.User, string, error) {
-	email := "xxxxx@xxxxx.com"
-	// user := queries.User{}
-	// 提前插入到数据库
-	user, err := q.FindUserByEmail(database.DBCtx, email)
-	if err != nil {
-		user, err = q.CreateUser(database.DBCtx, email)
-		if err != nil {
-			log.Println("创建失败")
-			return user, "", err
-		}
-	}
-
-	jwtString, err := jwt_helper.GenerateJWT(int(user.ID))
-	return user, jwtString, err
-}
 
 func TestCreateItemWithSuccess(t *testing.T) {
 	q, w, r, teardownTest := setupTestCase(t)
