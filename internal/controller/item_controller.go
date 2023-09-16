@@ -109,8 +109,16 @@ type ItemGetListReq struct {
 //	@Success		200		{object}	ItemGetListRes
 //	@Router			/item [get]
 func (ctrl *ItemController) getList(c *gin.Context) {
-	params := ItemGetListReq{}
+	params := ItemGetListReq{
+		HappenedAtBegin: time.Now().AddDate(-100, 0, 0),
+		HappenedAtEnd:   time.Now().AddDate(0, 0, 1),
+	}
+
 	user, ok := middleware.GetMe(c)
+	if !ok {
+		c.String(http.StatusInternalServerError, "服务器繁忙")
+		return
+	}
 
 	currentStr, _ := c.GetQuery("current")
 	if current, err := strconv.Atoi(currentStr); err == nil {
@@ -127,26 +135,19 @@ func (ctrl *ItemController) getList(c *gin.Context) {
 	}
 
 	happenedAtBeginStr, _ := c.GetQuery("happenedAtBegin")
-	if happenedAtBeginStr == "" {
-		params.HappenedAtBegin = time.Now().AddDate(-100, 0, 0)
-	} else if happenedAtBegin, err := time.Parse(time.RFC3339, happenedAtBeginStr); err != nil {
-		params.HappenedAtBegin = happenedAtBegin
+	if happenedAtBegin, err := time.Parse(time.DateTime, happenedAtBeginStr); err != nil {
+		log.Print("解析出错happenedAtBegin ", happenedAtBeginStr, " ", err)
 	} else {
-		params.HappenedAtBegin = time.Now().AddDate(-100, 0, 0)
+		log.Println(happenedAtBegin)
+		params.HappenedAtBegin = happenedAtBegin
 	}
 
 	happenedAtEndStr, _ := c.GetQuery("happenedAtEnd")
-	if happenedAtEndStr == "" {
-		params.HappenedAtEnd = time.Now().AddDate(0, 0, 1)
-	} else if happenedAtEnd, err := time.Parse(time.RFC3339, happenedAtEndStr); err != nil {
-		params.HappenedAtEnd = happenedAtEnd
+	if happenedAtEnd, err := time.Parse(time.DateTime, happenedAtEndStr); err != nil {
+		log.Print("解析出错happenedAtEnd ", happenedAtEnd, " ", err)
 	} else {
-		params.HappenedAtEnd = time.Now().AddDate(0, 0, 1)
-	}
-
-	if !ok {
-		c.Status(http.StatusUnauthorized)
-		return
+		log.Println(happenedAtEnd)
+		params.HappenedAtEnd = happenedAtEnd
 	}
 
 	q := database.NewQuery()
@@ -214,6 +215,7 @@ func (ctrl *ItemController) getList(c *gin.Context) {
 		c.String(http.StatusInternalServerError, "服务器繁忙")
 		return
 	}
+	log.Print("params: ", params)
 	res.Resourses = list
 
 	c.JSON(http.StatusOK, res)

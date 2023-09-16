@@ -37,3 +37,7 @@ WHERE
   AND happened_at >= sqlc.arg(happened_at_begin)
   AND happened_at < sqlc.arg(happened_at_end);
 
+-- name: DeleteItem :exec
+DELETE FROM items
+WHERE user_id = $1;
+

@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -96,7 +97,8 @@ func TestCreateItemWithError(t *testing.T) {
 	assert.Equal(t, http.StatusUnprocessableEntity, w.Code)
 }
 
-func TestListItem(t *testing.T) {
+// 测试分页
+func TestListItemOfPage(t *testing.T) {
 	q, w, r, teardownTest := setupTestCase(t)
 	defer teardownTest(t)
 	// 生成路由
@@ -104,52 +106,154 @@ func TestListItem(t *testing.T) {
 	itemController.RegisterRouter(r.Group("/api/v1"))
 
 	// 获取测试账户jwt
-	_, jwtString, err := getUsereAndJwt(q)
+	user, jwtString, err := getUsereAndJwt(q)
 	if err != nil {
 		log.Println(err)
 	}
 
-	req1, _ := http.NewRequest(
+	req, _ := http.NewRequest(
 		"GET",
 		"/api/v1/item",
 		nil,
 	)
 
-	// // 生成一个item
-	// for i := 0; i < 5; i++ {
-	// 	q.CreateItem(database.DBCtx, queries.CreateItemParams{
-	// 		UserID:     user.ID,
-	// 		Amount:     1000,
-	// 		Kind:       "in_come",
-	// 		HappenedAt: time.Now(),
-	// 		TagIds:     []int32{1, 2, 3},
-	// 	})
-	// }
+	// 清空测试用户的数据
+	err = q.DeleteItem(database.DBCtx, user.ID)
+	if err != nil {
+		log.Fatal("清库", err)
+	}
 
-	// q.ListItem(database.DBCtx, queries.ListItemParams{
-	// 	UserID: int32(user.ID),
-	// 	// HappenedAt   time.Time `json:"happenedAt"`
-	// 	// HappenedAt_2 time.Time `json:"happenedAt2"`
-	// 	Offset: 0,
-	// 	Limit:  5,
-	// })
+	// 构造用户的数据
+	for i := 0; i < 5; i++ {
+		q.CreateItem(database.DBCtx, queries.CreateItemParams{
+			UserID:     user.ID,
+			Amount:     1000,
+			Kind:       queries.KindInCome,
+			HappenedAt: time.Now(),
+			TagIds:     []int32{1, 2, 3},
+		})
+	}
+	for i := 0; i < 5; i++ {
+		q.CreateItem(database.DBCtx, queries.CreateItemParams{
+			UserID:     user.ID,
+			Amount:     1000,
+			Kind:       queries.KindExpenses,
+			HappenedAt: time.Now().AddDate(0, 0, -1),
+			TagIds:     []int32{1, 2, 3},
+		})
+	}
+	for i := 0; i < 5; i++ {
+		q.CreateItem(database.DBCtx, queries.CreateItemParams{
+			UserID:     user.ID,
+			Amount:     1000,
+			Kind:       queries.KindInCome,
+			HappenedAt: time.Now().AddDate(0, 0, -2),
+			TagIds:     []int32{1, 2, 3},
+		})
+	}
 
+	// 测试 分页是否正常
 	query := url.Values{}
-	query.Add("size", "5")
-	query.Add("current", "1")
+	query.Add("size", "10")
+	query.Add("current", "2")
 
-	req1.URL.RawQuery = query.Encode()
+	req.URL.RawQuery = query.Encode()
 
-	req1.Header = http.Header{
+	req.Header = http.Header{
 		Authorization: []string{"Bearer " + jwtString},
 	}
-	r.ServeHTTP(w, req1)
+	r.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	res := ItemGetListRes{}
 	bodyStr := w.Body.String()
 	json.Unmarshal([]byte(bodyStr), &res)
-	log.Println(res.Resourses)
+
 	assert.Equal(t, len(res.Resourses), 5)
+	assert.Equal(t, res.Expenses, int32(5000))
+	assert.Equal(t, res.Income, int32(10000))
+}
+
+func TestListItemOfQuery(t *testing.T) {
+	q, w, r, teardownTest := setupTestCase(t)
+	defer teardownTest(t)
+	// 生成路由
+	itemController := ItemController{}
+	itemController.RegisterRouter(r.Group("/api/v1"))
+
+	// 获取测试账户jwt
+	user, jwtString, err := getUsereAndJwt(q)
+	if err != nil {
+		log.Println(err)
+	}
+
+	req, _ := http.NewRequest(
+		"GET",
+		"/api/v1/item",
+		nil,
+	)
+
+	// 清空测试用户的数据
+	err = q.DeleteItem(database.DBCtx, user.ID)
+	if err != nil {
+		log.Fatal("清库", err)
+	}
+
+	// 构造用户的数据
+	for i := 0; i < 3; i++ {
+		q.CreateItem(database.DBCtx, queries.CreateItemParams{
+			UserID:     user.ID,
+			Amount:     1000,
+			Kind:       queries.KindExpenses,
+			HappenedAt: time.Now(),
+			TagIds:     []int32{1},
+		})
+	}
+
+	for i := 0; i < 3; i++ {
+		q.CreateItem(database.DBCtx, queries.CreateItemParams{
+			UserID:     user.ID,
+			Amount:     1000,
+			Kind:       queries.KindExpenses,
+			HappenedAt: time.Now().AddDate(0, 0, -2),
+			TagIds:     []int32{2},
+		})
+	}
+
+	for i := 0; i < 3; i++ {
+		q.CreateItem(database.DBCtx, queries.CreateItemParams{
+			UserID:     user.ID,
+			Amount:     1000,
+			Kind:       queries.KindExpenses,
+			HappenedAt: time.Now().AddDate(0, 0, -8),
+			TagIds:     []int32{3},
+		})
+	}
+
+	// 测试 分页是否正常
+	query := url.Values{}
+	query.Add("size", "10")
+	query.Add("current", "1")
+	query.Add("happenedAtBegin", time.Now().AddDate(0, 0, -2).Format(time.DateTime))
+	query.Add("happenedAtEnd", time.Now().Format(time.DateTime))
+
+	req.URL.RawQuery = query.Encode()
+	req.Header = http.Header{
+		Authorization: []string{"Bearer " + jwtString},
+	}
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	res := ItemGetListRes{}
+	bodyStr := w.Body.String()
+	log.Println(res)
+	json.Unmarshal([]byte(bodyStr), &res)
+
+	assert.Equal(t, len(res.Resourses), int(3))
+	assert.Equal(t, 1000*3, int(res.Expenses))
+	assert.Equal(t, 0, int(res.Income))
+
+	// assert.Equal(t, res.Pager.Total, 10)
 }

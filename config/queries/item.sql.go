@@ -65,6 +65,16 @@ func (q *Queries) CreateItem(ctx context.Context, arg CreateItemParams) (Item, e
 	return i, err
 }
 
+const deleteItem = `-- name: DeleteItem :exec
+DELETE FROM items
+WHERE user_id = $1
+`
+
+func (q *Queries) DeleteItem(ctx context.Context, userID int32) error {
+	_, err := q.db.ExecContext(ctx, deleteItem, userID)
+	return err
+}
+
 const itemsBalance = `-- name: ItemsBalance :many
 SELECT
   amount
