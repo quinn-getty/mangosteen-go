@@ -64,6 +64,16 @@ type Item struct {
 	UpdatedAt  time.Time `json:"updatedAt"`
 }
 
+type Tag struct {
+	ID        int32        `json:"id"`
+	UserID    int32        `json:"userId"`
+	Name      string       `json:"name"`
+	Sign      string       `json:"sign"`
+	DeletedAt sql.NullTime `json:"deletedAt"`
+	CreatedAt time.Time    `json:"createdAt"`
+	UpdatedAt time.Time    `json:"updatedAt"`
+}
+
 type User struct {
 	ID        int32     `json:"id"`
 	Email     string    `json:"email"`
