@@ -60,6 +60,16 @@ func (q *Queries) DeleteTag(ctx context.Context, id int32) (Tag, error) {
 	return i, err
 }
 
+const deleteUserAllTag = `-- name: DeleteUserAllTag :exec
+DELETE FROM tags
+WHERE user_id = $1
+`
+
+func (q *Queries) DeleteUserAllTag(ctx context.Context, userID int32) error {
+	_, err := q.db.ExecContext(ctx, deleteUserAllTag, userID)
+	return err
+}
+
 const listTag = `-- name: ListTag :many
 SELECT
   id, user_id, name, sign, deleted_at, created_at, updated_at

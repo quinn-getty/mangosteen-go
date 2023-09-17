@@ -17,7 +17,10 @@ import (
 * @return func(t *testing.T)
  */
 func setupTestCase(t *testing.T) (*queries.Queries, *httptest.ResponseRecorder, *gin.Engine, func(t *testing.T)) {
-	r := gin.Default()
+	gin.SetMode(gin.ReleaseMode)
+	r := gin.New()
+	r.Use(gin.Recovery())
+
 	internal.InitRouter(r)
 
 	w := httptest.NewRecorder()

@@ -33,3 +33,7 @@ WHERE id = $1
 RETURNING
   *;
 
+-- name: DeleteUserAllTag :exec
+DELETE FROM tags
+WHERE user_id = $1;
+

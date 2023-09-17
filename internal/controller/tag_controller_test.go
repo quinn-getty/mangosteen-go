@@ -83,10 +83,20 @@ func TestListTagWithError(t *testing.T) {
 	tagController := TagController{}
 	tagController.RegisterRouter(apiV1)
 
-	_, jwtString, err := getUsereAndJwt(q)
+	user, jwtString, err := getUsereAndJwt(q)
 	if err != nil {
 		log.Println(err)
 	}
+
+	if err := q.DeleteUserAllTag(database.DBCtx, user.ID); err != nil {
+		log.Fatalln(err)
+	}
+
+	q.CreateTag(database.DBCtx, queries.CreateTagParams{
+		UserID: user.ID,
+		Name:   "string",
+		Sign:   "string",
+	})
 
 	req, _ := http.NewRequest(
 		"GET",
