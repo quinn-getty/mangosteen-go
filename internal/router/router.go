@@ -16,6 +16,7 @@ func LoadController(rg *gin.RouterGroup) {
 		&controller.VaildationCodeController{},
 		&controller.MeController{},
 		&controller.ItemController{},
+		&controller.TagController{},
 	}
 
 	for _, c := range controllerList {

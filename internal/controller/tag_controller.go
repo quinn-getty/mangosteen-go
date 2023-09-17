@@ -7,6 +7,8 @@ import (
 	"mangosteen/internal/middleware"
 	"net/http"
 
+	_ "database/sql"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -28,17 +30,20 @@ type CreateTagRes struct {
 	Resource queries.Tag `json:"resource"`
 }
 
-// CreateItem godoc
+// CreateTag godoc
 //
-//	@Summary		创建tag
-//	@Description	创建tag
-//	@Security		Beare
-//	@Tags			tag
-//	@Accept			json
-//	@Produce		json
-//	@Param			body	body		CreateTagReq	true	"body参数"
-//	@Success		200		{object}	CreateTagRes
-//	@Router			/tag [post]
+// @Summary		tag
+// @Description	获取tag
+// @Tags			tag
+// @Accept			json
+// @Produce		json
+//
+// @Security		Bearer
+//
+// @Param			body	body		CreateTagReq	true	"body参数"
+// @Success		200		{object}	CreateTagRes
+// @Failure		500
+// @Router			/tag [post]
 func (ctrl *TagController) Create(c *gin.Context) {
 	req := CreateTagReq{}
 
@@ -78,22 +83,25 @@ type TagListRes struct {
 
 // TagList godoc
 //
-//	@Summary		tag list
-//	@Description	创建 list
-//	@Security		Beare
+//	@Summary		tag
+//	@Description	获取tag
 //	@Tags			tag
 //	@Accept			json
+//	@Security		Bearer
 //	@Produce		json
-//	@Param			body	body		TagListReq	true	"body参数"
-//	@Success		200		{object}	TagListRes
+//	@Success		200	{object}	TagListRes
+//	@Failure		500
 //	@Router			/tag [get]
 func (ctrl *TagController) getList(c *gin.Context) {
-	// user, _ := middleware.GetMe(c)
-	// q := database.NewQuery()
-	// item, err := q.CreateTag(c, queries.CreateTagParams{
-	// 	UserID: user.ID,
-	// 	Name:   req.Name,
-	// 	Sign:   req.Sign,
-	// })
+	res := TagListRes{}
+	user, _ := middleware.GetMe(c)
+	q := database.NewQuery()
+	item, err := q.ListTag(c, user.ID)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "服务器繁忙")
+		return
+	}
+	res.Resource = item
 
+	c.JSON(http.StatusOK, res)
 }

@@ -5,7 +5,6 @@
 package queries
 
 import (
-	"database/sql"
 	"database/sql/driver"
 	"fmt"
 	"time"
@@ -65,13 +64,13 @@ type Item struct {
 }
 
 type Tag struct {
-	ID        int32        `json:"id"`
-	UserID    int32        `json:"userId"`
-	Name      string       `json:"name"`
-	Sign      string       `json:"sign"`
-	DeletedAt sql.NullTime `json:"deletedAt"`
-	CreatedAt time.Time    `json:"createdAt"`
-	UpdatedAt time.Time    `json:"updatedAt"`
+	ID        int32      `json:"id"`
+	UserID    int32      `json:"userId"`
+	Name      string     `json:"name"`
+	Sign      string     `json:"sign"`
+	DeletedAt *time.Time `json:"deletedAt"`
+	CreatedAt time.Time  `json:"createdAt"`
+	UpdatedAt time.Time  `json:"updatedAt"`
 }
 
 type User struct {
@@ -84,10 +83,10 @@ type User struct {
 }
 
 type ValidationCode struct {
-	ID        int32        `json:"id"`
-	Code      string       `json:"code"`
-	Email     string       `json:"email"`
-	UsededAt  sql.NullTime `json:"usededAt"`
-	CreatedAt time.Time    `json:"createdAt"`
-	UpdatedAt time.Time    `json:"updatedAt"`
+	ID        int32      `json:"id"`
+	Code      string     `json:"code"`
+	Email     string     `json:"email"`
+	UsededAt  *time.Time `json:"usededAt"`
+	CreatedAt time.Time  `json:"createdAt"`
+	UpdatedAt time.Time  `json:"updatedAt"`
 }

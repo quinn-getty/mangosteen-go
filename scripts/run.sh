@@ -1,1 +1,1 @@
-swag init -g internal/router/router.go && go build . && ./mangosteen server      
+swag init --parseDependency -g internal/router/router.go && go build . && ./mangosteen server      
