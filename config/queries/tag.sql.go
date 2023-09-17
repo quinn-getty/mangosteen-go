@@ -38,14 +38,26 @@ func (q *Queries) CreateTag(ctx context.Context, arg CreateTagParams) (Tag, erro
 	return i, err
 }
 
-const deleteTag = `-- name: DeleteTag :exec
+const deleteTag = `-- name: DeleteTag :one
 DELETE FROM tags
 WHERE id = $1
+RETURNING
+  id, user_id, name, sign, deleted_at, created_at, updated_at
 `
 
-func (q *Queries) DeleteTag(ctx context.Context, id int32) error {
-	_, err := q.db.ExecContext(ctx, deleteTag, id)
-	return err
+func (q *Queries) DeleteTag(ctx context.Context, id int32) (Tag, error) {
+	row := q.db.QueryRowContext(ctx, deleteTag, id)
+	var i Tag
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.Name,
+		&i.Sign,
+		&i.DeletedAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }
 
 const listTag = `-- name: ListTag :many

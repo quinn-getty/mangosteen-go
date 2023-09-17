@@ -75,7 +75,7 @@ func (ctrl *TagController) Create(c *gin.Context) {
 }
 
 type DeleteTagRes struct {
-	Resource int32 `json: "resource"`
+	Resource queries.Tag `json:"resource"`
 }
 
 // TagUpdate godoc
@@ -98,21 +98,21 @@ func (ctrl *TagController) Delete(c *gin.Context) {
 	}
 	q := database.NewQuery()
 
-	err = q.DeleteTag(database.DBCtx, int32(id))
+	tag, err := q.DeleteTag(database.DBCtx, int32(id))
 
 	if err != nil {
 		c.String(500, err.Error())
 		return
 	}
 	c.JSON(http.StatusOK, DeleteTagRes{
-		Resource: int32(id),
+		Resource: tag,
 	})
 }
 
 type TagUpdateReq struct {
 	Id   int32  `json:"id" binding:"required"`
-	Sign string `json:"sign" binding:"required"`
-	Name string `json:"name" binding:"required"`
+	Sign string `json:"sign"`
+	Name string `json:"name"`
 }
 
 type TagUpdateRes struct {

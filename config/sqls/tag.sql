@@ -27,7 +27,9 @@ WHERE
 RETURNING
   *;
 
--- name: DeleteTag :exec
+-- name: DeleteTag :one
 DELETE FROM tags
-WHERE id = $1;
+WHERE id = $1
+RETURNING
+  *;
 
