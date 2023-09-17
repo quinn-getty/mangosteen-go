@@ -39,8 +39,13 @@ func (q *Queries) CreateTag(ctx context.Context, arg CreateTagParams) (Tag, erro
 }
 
 const deleteTag = `-- name: DeleteTag :one
-DELETE FROM tags
-WHERE id = $1
+UPDATE
+  tags
+SET
+  deleted_at = now(),
+  updated_at = now()
+WHERE
+  id = $1
 RETURNING
   id, user_id, name, sign, deleted_at, created_at, updated_at
 `
@@ -117,28 +122,41 @@ const updateTag = `-- name: UpdateTag :one
 UPDATE
   tags
 SET
-  name = $1,
-  sign = $2,
-  updated_at = $3
+  name = CASE WHEN $2::varchar = '' THEN
+    name
+  ELSE
+    $2
+  END,
+  sign = CASE WHEN $3::varchar = '' THEN
+    sign
+  ELSE
+    $3
+  END,
+  updated_at = CASE WHEN $4::timestamp = '' THEN
+    updated_at
+  ELSE
+    $4
+  END,
+  updated_at = now()
 WHERE
-  id = $4
+  id = $1
 RETURNING
   id, user_id, name, sign, deleted_at, created_at, updated_at
 `
 
 type UpdateTagParams struct {
+	ID        int32     `json:"id"`
 	Name      string    `json:"name"`
 	Sign      string    `json:"sign"`
 	UpdatedAt time.Time `json:"updatedAt"`
-	ID        int32     `json:"id"`
 }
 
 func (q *Queries) UpdateTag(ctx context.Context, arg UpdateTagParams) (Tag, error) {
 	row := q.db.QueryRowContext(ctx, updateTag,
+		arg.ID,
 		arg.Name,
 		arg.Sign,
 		arg.UpdatedAt,
-		arg.ID,
 	)
 	var i Tag
 	err := row.Scan(

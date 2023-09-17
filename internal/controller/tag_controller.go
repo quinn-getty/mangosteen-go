@@ -22,6 +22,7 @@ func (ctrl *TagController) RegisterRouter(rg *gin.RouterGroup) {
 	item.POST("", ctrl.Create)
 	item.GET("", ctrl.getList)
 	item.PATCH("", ctrl.Update)
+	item.DELETE("/:id", ctrl.Delete)
 }
 
 type CreateTagReq struct {
@@ -78,7 +79,7 @@ type DeleteTagRes struct {
 	Resource queries.Tag `json:"resource"`
 }
 
-// TagUpdate godoc
+// TagDelete godoc
 //
 //	@Summary		tag
 //	@Description	获取tag
@@ -99,7 +100,7 @@ func (ctrl *TagController) Delete(c *gin.Context) {
 	q := database.NewQuery()
 
 	tag, err := q.DeleteTag(database.DBCtx, int32(id))
-
+	// int32(id)
 	if err != nil {
 		c.String(500, err.Error())
 		return

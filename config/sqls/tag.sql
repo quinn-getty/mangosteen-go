@@ -19,17 +19,35 @@ ORDER BY
 UPDATE
   tags
 SET
-  name = $1,
-  sign = $2,
-  updated_at = $3
+  name = CASE WHEN @name::varchar = '' THEN
+    name
+  ELSE
+    @name
+  END,
+  sign = CASE WHEN @sign::varchar = '' THEN
+    sign
+  ELSE
+    @sign
+  END,
+  updated_at = CASE WHEN @updated_at::timestamp = '' THEN
+    updated_at
+  ELSE
+    @updated_at
+  END,
+  updated_at = now()
 WHERE
-  id = $4
+  id = $1
 RETURNING
   *;
 
 -- name: DeleteTag :one
-DELETE FROM tags
-WHERE id = $1
+UPDATE
+  tags
+SET
+  deleted_at = now(),
+  updated_at = now()
+WHERE
+  id = $1
 RETURNING
   *;
 

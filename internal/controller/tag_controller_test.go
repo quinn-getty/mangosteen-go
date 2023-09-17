@@ -161,46 +161,53 @@ func TestUpdateTagWithSuccess(t *testing.T) {
 }
 
 func TestDeleteTagWithSuccess(t *testing.T) {
-	// q, w, r, teardownTest := setupTestCase(t)
-	// defer teardownTest(t)
-	// apiV1 := r.Group("/api/v1")
-	// tagController := TagController{}
-	// tagController.RegisterRouter(apiV1)
+	q, w, r, teardownTest := setupTestCase(t)
+	defer teardownTest(t)
+	apiV1 := r.Group("/api/v1")
+	tagController := TagController{}
+	tagController.RegisterRouter(apiV1)
 
-	// user, jwtString, err := getUsereAndJwt(q)
-	// if err != nil {
-	// 	log.Println(err)
-	// }
+	user, jwtString, err := getUsereAndJwt(q)
+	if err != nil {
+		log.Println(err)
+	}
 
-	// tag, err := q.CreateTag(database.DBCtx, queries.CreateTagParams{
-	// 	UserID: user.ID,
-	// 	Name:   "通勤",
-	// 	Sign:   "🚗",
-	// })
-	// if err != nil {
-	// 	log.Fatalln(err)
-	// }
+	if err := q.DeleteUserAllTag(database.DBCtx, user.ID); err != nil {
+		log.Fatalln(err)
+	}
 
-	// req, _ := http.NewRequest(
-	// 	"PATCH",
-	// 	"/api/v1/tag",
-	// 	strings.NewReader(fmt.Sprintf(`{
-	// 		"id": %d,
-	// 		"name": "要删除的",
-	// 		"sign": "🍚"
-	// 	}`, tag.ID)),
-	// )
+	tag, err := q.CreateTag(database.DBCtx, queries.CreateTagParams{
+		UserID: user.ID,
+		Name:   "string",
+		Sign:   "string",
+	})
+	if err != nil {
+		log.Fatalln(err)
+	}
 
-	// req.Header = http.Header{
-	// 	Authorization: []string{"Bearer " + jwtString},
-	// }
-	// r.ServeHTTP(w, req)
-	// assert.Equal(t, http.StatusOK, w.Code)
+	req, _ := http.NewRequest(
+		"DELETE",
+		fmt.Sprintf("/api/v1/tag/%d", tag.ID), nil,
+	)
 
-	// bodyStr := w.Body.String()
-	// resTag := TagUpdateRes{}
-	// json.Unmarshal([]byte(bodyStr), &resTag)
-	// assert.Equal(t, resTag.Resource.ID, tag.ID)
-	// assert.Equal(t, resTag.Resource.Name, "吃饭")
-	// assert.Equal(t, resTag.Resource.Sign, "🍚")
+	req.Header = http.Header{
+		Authorization: []string{"Bearer " + jwtString},
+	}
+	r.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	bodyStr := w.Body.String()
+	resTag := DeleteTagRes{}
+	json.Unmarshal([]byte(bodyStr), &resTag)
+	assert.Equal(t, resTag.Resource.ID, tag.ID)
+	log.Println(resTag)
+	assert.NotNil(t, resTag.Resource.DeletedAt)
+
+	list, err := q.ListTag(database.DBCtx, user.ID)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	assert.Equal(t, len(list), int(0))
+
 }
