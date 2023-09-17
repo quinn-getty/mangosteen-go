@@ -7,6 +7,7 @@ package queries
 
 import (
 	"context"
+	"time"
 )
 
 const createTag = `-- name: CreateTag :one
@@ -35,6 +36,16 @@ func (q *Queries) CreateTag(ctx context.Context, arg CreateTagParams) (Tag, erro
 		&i.UpdatedAt,
 	)
 	return i, err
+}
+
+const deleteTag = `-- name: DeleteTag :exec
+DELETE FROM tags
+WHERE id = $1
+`
+
+func (q *Queries) DeleteTag(ctx context.Context, id int32) error {
+	_, err := q.db.ExecContext(ctx, deleteTag, id)
+	return err
 }
 
 const listTag = `-- name: ListTag :many
@@ -78,4 +89,44 @@ func (q *Queries) ListTag(ctx context.Context, userID int32) ([]Tag, error) {
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateTag = `-- name: UpdateTag :one
+UPDATE
+  tags
+SET
+  name = $1,
+  sign = $2,
+  updated_at = $3
+WHERE
+  id = $4
+RETURNING
+  id, user_id, name, sign, deleted_at, created_at, updated_at
+`
+
+type UpdateTagParams struct {
+	Name      string    `json:"name"`
+	Sign      string    `json:"sign"`
+	UpdatedAt time.Time `json:"updatedAt"`
+	ID        int32     `json:"id"`
+}
+
+func (q *Queries) UpdateTag(ctx context.Context, arg UpdateTagParams) (Tag, error) {
+	row := q.db.QueryRowContext(ctx, updateTag,
+		arg.Name,
+		arg.Sign,
+		arg.UpdatedAt,
+		arg.ID,
+	)
+	var i Tag
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.Name,
+		&i.Sign,
+		&i.DeletedAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }

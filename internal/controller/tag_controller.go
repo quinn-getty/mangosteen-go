@@ -6,6 +6,7 @@ import (
 	"mangosteen/internal/database"
 	"mangosteen/internal/middleware"
 	"net/http"
+	"time"
 
 	_ "database/sql"
 
@@ -71,9 +72,60 @@ func (ctrl *TagController) Create(c *gin.Context) {
 	})
 }
 
-func (ctrl *TagController) Delete(c *gin.Context) {}
-func (ctrl *TagController) Update(c *gin.Context) {}
-func (ctrl *TagController) Get(c *gin.Context)    {}
+func (ctrl *TagController) Delete(c *gin.Context) {
+
+}
+
+type TagUpdateReq struct {
+	Id   int32  `json:"id" binding:"required"`
+	Sign string `json:"sign" binding:"required"`
+	Name string `json:"name" binding:"required"`
+}
+
+type TagUpdateRes struct {
+	Resource queries.Tag `json:"resource"`
+}
+
+// TagUpdate godoc
+//
+//		@Summary		tag
+//		@Description	获取tag
+//		@Tags			tag
+//		@Accept			json
+//		@Security		Bearer
+//		@Produce		json
+//	  @Param			body	body		TagUpdateReq	true	"body参数"
+//		@Success		200	{object}	TagUpdateRes
+//		@Failure		500
+//		@Router			/tag [update]
+func (ctrl *TagController) Update(c *gin.Context) {
+	req := TagUpdateReq{}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		log.Print("入参错误", err)
+		c.String(http.StatusUnprocessableEntity, "参数错误")
+		return
+	}
+
+	q := database.NewQuery()
+	tag, err := q.UpdateTag(c, queries.UpdateTagParams{
+		ID:        req.Id,
+		Name:      req.Name,
+		Sign:      req.Sign,
+		UpdatedAt: time.Now(),
+	})
+
+	if err != nil {
+		c.String(500, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, CreateTagRes{
+		Resource: tag,
+	})
+}
+
+func (ctrl *TagController) Get(c *gin.Context) {}
 
 type TagListReq struct{}
 

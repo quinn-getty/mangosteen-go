@@ -15,3 +15,19 @@ WHERE
 ORDER BY
   created_at DESC;
 
+-- name: UpdateTag :one
+UPDATE
+  tags
+SET
+  name = $1,
+  sign = $2,
+  updated_at = $3
+WHERE
+  id = $4
+RETURNING
+  *;
+
+-- name: DeleteTag :exec
+DELETE FROM tags
+WHERE id = $1;
+
