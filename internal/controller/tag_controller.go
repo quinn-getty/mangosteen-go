@@ -6,6 +6,7 @@ import (
 	"mangosteen/internal/database"
 	"mangosteen/internal/middleware"
 	"net/http"
+	"strconv"
 	"time"
 
 	_ "database/sql"
@@ -20,6 +21,7 @@ func (ctrl *TagController) RegisterRouter(rg *gin.RouterGroup) {
 	item := rg.Group("/tag")
 	item.POST("", ctrl.Create)
 	item.GET("", ctrl.getList)
+	item.PATCH("", ctrl.Update)
 }
 
 type CreateTagReq struct {
@@ -72,8 +74,39 @@ func (ctrl *TagController) Create(c *gin.Context) {
 	})
 }
 
-func (ctrl *TagController) Delete(c *gin.Context) {
+type DeleteTagRes struct {
+	Resource int32 `json: "resource"`
+}
 
+// TagUpdate godoc
+//
+//	@Summary		tag
+//	@Description	获取tag
+//	@Tags			tag
+//	@Accept			json
+//	@Security		Bearer
+//	@Produce		json
+//	@Success		200	{object}	DeleteTagRes
+//	@Failure		500
+//	@Router			/tag/:id [post]
+func (ctrl *TagController) Delete(c *gin.Context) {
+	idString, _ := c.Params.Get("id")
+	id, err := strconv.Atoi(idString)
+	if err != nil {
+		c.String(422, "参数错误")
+		return
+	}
+	q := database.NewQuery()
+
+	err = q.DeleteTag(database.DBCtx, int32(id))
+
+	if err != nil {
+		c.String(500, err.Error())
+		return
+	}
+	c.JSON(http.StatusOK, DeleteTagRes{
+		Resource: int32(id),
+	})
 }
 
 type TagUpdateReq struct {
@@ -97,7 +130,7 @@ type TagUpdateRes struct {
 //	  @Param			body	body		TagUpdateReq	true	"body参数"
 //		@Success		200	{object}	TagUpdateRes
 //		@Failure		500
-//		@Router			/tag [update]
+//		@Router			/tag [post]
 func (ctrl *TagController) Update(c *gin.Context) {
 	req := TagUpdateReq{}
 
