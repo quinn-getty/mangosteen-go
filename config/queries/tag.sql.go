@@ -75,6 +75,37 @@ func (q *Queries) DeleteUserAllTag(ctx context.Context, userID int32) error {
 	return err
 }
 
+const findTag = `-- name: FindTag :one
+SELECT
+  id, user_id, name, sign, deleted_at, created_at, updated_at
+FROM
+  tags
+WHERE
+  id = $1
+  AND user_id = $2
+  AND deleted_at IS NULL
+`
+
+type FindTagParams struct {
+	ID     int32 `json:"id"`
+	UserID int32 `json:"userId"`
+}
+
+func (q *Queries) FindTag(ctx context.Context, arg FindTagParams) (Tag, error) {
+	row := q.db.QueryRowContext(ctx, findTag, arg.ID, arg.UserID)
+	var i Tag
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.Name,
+		&i.Sign,
+		&i.DeletedAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const listTag = `-- name: ListTag :many
 SELECT
   id, user_id, name, sign, deleted_at, created_at, updated_at

@@ -211,3 +211,47 @@ func TestDeleteTagWithSuccess(t *testing.T) {
 	assert.Equal(t, len(list), int(0))
 
 }
+
+func TestFindTagWithSuccess(t *testing.T) {
+	q, w, r, teardownTest := setupTestCase(t)
+	defer teardownTest(t)
+	apiV1 := r.Group("/api/v1")
+	tagController := TagController{}
+	tagController.RegisterRouter(apiV1)
+
+	user, jwtString, err := getUsereAndJwt(q)
+	if err != nil {
+		log.Println(err)
+	}
+
+	if err := q.DeleteUserAllTag(database.DBCtx, user.ID); err != nil {
+		log.Fatalln(err)
+	}
+
+	tag, err := q.CreateTag(database.DBCtx, queries.CreateTagParams{
+		UserID: user.ID,
+		Name:   "string",
+		Sign:   "string",
+	})
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	req, _ := http.NewRequest(
+		"GET",
+		fmt.Sprintf("/api/v1/tag/%d", tag.ID), nil,
+	)
+
+	req.Header = http.Header{
+		Authorization: []string{"Bearer " + jwtString},
+	}
+	r.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	bodyStr := w.Body.String()
+	resTag := DeleteTagRes{}
+
+	json.Unmarshal([]byte(bodyStr), &resTag)
+	assert.Equal(t, resTag.Resource.ID, tag.ID)
+	assert.Nil(t, resTag.Resource.DeletedAt)
+}

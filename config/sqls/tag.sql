@@ -55,3 +55,13 @@ RETURNING
 DELETE FROM tags
 WHERE user_id = $1;
 
+-- name: FindTag :one
+SELECT
+  *
+FROM
+  tags
+WHERE
+  id = $1
+  AND user_id = $2
+  AND deleted_at IS NULL;
+

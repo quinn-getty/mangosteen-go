@@ -23,6 +23,7 @@ func (ctrl *TagController) RegisterRouter(rg *gin.RouterGroup) {
 	item.GET("", ctrl.getList)
 	item.PATCH("", ctrl.Update)
 	item.DELETE("/:id", ctrl.Delete)
+	item.GET("/:id", ctrl.Get)
 }
 
 type CreateTagReq struct {
@@ -159,7 +160,46 @@ func (ctrl *TagController) Update(c *gin.Context) {
 	})
 }
 
-func (ctrl *TagController) Get(c *gin.Context) {}
+type FindTagRes struct {
+	Resource queries.Tag `json:"resource"`
+}
+
+// FindTag godoc
+//
+//	@Summary		tag
+//	@Description	获取tag
+//	@Tags			tag
+//	@Accept			json
+//	@Security		Bearer
+//	@Produce		json
+//	@Success		200	{object}	FindTagRes
+//	@Failure		500
+//	@Router			/tag/:id [get]
+func (ctrl *TagController) Get(c *gin.Context) {
+	idString, _ := c.Params.Get("id")
+	user, _ := middleware.GetMe(c)
+
+	id, err := strconv.Atoi(idString)
+	if err != nil {
+		c.String(422, "参数错误")
+		return
+	}
+	q := database.NewQuery()
+
+	tag, err := q.FindTag(database.DBCtx,
+		queries.FindTagParams{
+			ID:     int32(id),
+			UserID: user.ID,
+		})
+	if err != nil {
+		c.String(500, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, DeleteTagRes{
+		Resource: tag,
+	})
+}
 
 type TagListReq struct{}
 
