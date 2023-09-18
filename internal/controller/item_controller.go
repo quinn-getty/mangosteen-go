@@ -19,6 +19,7 @@ func (ctrl *ItemController) RegisterRouter(rg *gin.RouterGroup) {
 	item := rg.Group("/item")
 	item.POST("", ctrl.Create)
 	item.GET("", ctrl.getList)
+	item.GET("/summary", ctrl.GetSummary)
 }
 
 type CreateItemReq struct {
@@ -218,5 +219,41 @@ func (ctrl *ItemController) getList(c *gin.Context) {
 	log.Print("params: ", params)
 	res.Resourses = list
 
+	c.JSON(http.StatusOK, res)
+}
+
+type ItemGetSummaryRes struct {
+	Resourses []queries.Item `json:"resourses"`
+	Pager     Pager          `json:"pager"`
+	Income    int32          `json:"inCome"`
+	Expenses  int32          `json:"expenses"`
+}
+
+type ItemGetSummaryReq struct {
+	HappenedAtBegin time.Time    `json:"happenedAtBegin" `
+	HappenedAtEnd   time.Time    `json:"happenedAtEnd" `
+	Kind            queries.Kind `json:"kind" `
+	GroupBy         string       `json:"groupBy"`
+}
+
+// ItemList godoc
+//
+//	@Summary		item List
+//	@Description	item List
+//	@Security		Bearer
+//	@Tags			item
+//	@Accept			json
+//	@Produce		json
+//	@Param			query	query		ItemGetSummaryReq	true	"query参数"
+//	@Success		200		{object}	ItemGetSummaryRes
+//	@Router			/summary [get]
+func (ctrl *ItemController) GetSummary(c *gin.Context) {
+	req := ItemGetSummaryReq{}
+	res := ItemGetListRes{}
+	err := c.BindQuery(req)
+	if err != nil {
+		c.String(http.StatusBadRequest, "参数错误")
+		return
+	}
 	c.JSON(http.StatusOK, res)
 }
