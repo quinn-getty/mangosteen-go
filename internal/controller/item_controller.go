@@ -111,7 +111,7 @@ func (ctrl *ItemController) getList(c *gin.Context) {
 		log.Print("解析出错happenedAtBegin ", happenedAtBeginStr, " ", err)
 	} else {
 		log.Println(happenedAtBegin)
-		params.HappenedAtBegin = happenedAtBegin.Add(time.Minute * 59).Add(time.Second * 59)
+		params.HappenedAtBegin = happenedAtBegin
 	}
 
 	happenedAtEndStr, _ := c.GetQuery("happenedAtEnd")
@@ -119,7 +119,7 @@ func (ctrl *ItemController) getList(c *gin.Context) {
 		log.Print("解析出错happenedAtEnd ", happenedAtEnd, " ", err)
 	} else {
 		log.Println(happenedAtEnd)
-		params.HappenedAtEnd = happenedAtEnd.Add(time.Hour * 23).Add(time.Minute * 59).Add(time.Second * 59)
+		params.HappenedAtEnd = happenedAtEnd.Add(time.Hour * 23).Add(time.Minute * 59).Add(time.Second * 59).Add(time.Millisecond * 999)
 	}
 
 	q := database.NewQuery()
@@ -237,10 +237,8 @@ func (ctrl *ItemController) GetSummary(c *gin.Context) {
 		c.Status(http.StatusBadRequest)
 		return
 	} else {
-		req.HappenedAtEnd = happenedAtEnd
+		req.HappenedAtEnd = happenedAtEnd.Add(time.Hour * 23).Add(time.Minute * 59).Add(time.Second * 59)
 	}
-
-	log.Println(req.Kind)
 
 	items, err := q.ListItemsByHappenedAtAndKind(database.DBCtx, queries.ListItemsByHappenedAtAndKindParams{
 		Kind:            req.Kind,
@@ -248,12 +246,9 @@ func (ctrl *ItemController) GetSummary(c *gin.Context) {
 		HappenedAtEnd:   req.HappenedAtEnd,
 		UserID:          user.ID,
 	})
-	log.Println(items)
 	if err != nil {
 		c.Status(500)
 	}
-
-	log.Print("items:", items)
 
 	for _, item := range items {
 		k := item.HappenedAt.Format(time.DateOnly)

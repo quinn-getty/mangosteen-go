@@ -235,7 +235,7 @@ func TestListItemOfQuery(t *testing.T) {
 	json.Unmarshal([]byte(bodyStr), &res)
 
 	assert.Equal(t, len(res.Resourses), int(3))
-	assert.Equal(t, 1000*3, int(res.Expenses))
+	assert.Equal(t, 1000*9, int(res.Expenses))
 	assert.Equal(t, 0, int(res.Income))
 }
 
@@ -314,8 +314,6 @@ func TestItemGetSummary(t *testing.T) {
 	bodyStr := w.Body.String()
 	json.Unmarshal([]byte(bodyStr), &res)
 
-	log.Println(bodyStr)
-
-	assert.Equal(t, res.Total, int32(6000))
-	assert.Equal(t, 2, len(res.Groups))
+	assert.Equal(t, res.Total, int32(1000*9))
+	assert.Equal(t, 3, len(res.Groups))
 }
