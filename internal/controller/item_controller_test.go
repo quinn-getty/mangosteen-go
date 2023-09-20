@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"mangosteen/config/queries"
+	"mangosteen/internal/api"
 	"mangosteen/internal/database"
 	"net/http"
 	"net/url"
@@ -44,7 +45,7 @@ func TestCreateItemWithSuccess(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	bodyStr := w.Body.String()
-	resItem := CreateItemRes{}
+	resItem := api.CreateItemRes{}
 	json.Unmarshal([]byte(bodyStr), &resItem)
 	assert.Equal(t, resItem.Resource.UserID, user.ID)
 	assert.Equal(t, int32(100), resItem.Resource.Amount)
@@ -148,7 +149,7 @@ func TestListItemOfPage(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	res := ItemGetListRes{}
+	res := api.ItemGetListRes{}
 	bodyStr := w.Body.String()
 	json.Unmarshal([]byte(bodyStr), &res)
 
@@ -217,8 +218,8 @@ func TestListItemOfQuery(t *testing.T) {
 	query := url.Values{}
 	query.Add("size", "10")
 	query.Add("current", "1")
-	query.Add("happenedAtBegin", time.Now().AddDate(0, 0, -2).Format(time.DateTime))
-	query.Add("happenedAtEnd", time.Now().Format(time.DateTime))
+	query.Add("happenedAtBegin", time.Now().AddDate(0, 0, -2).Format(time.DateOnly))
+	query.Add("happenedAtEnd", time.Now().Format(time.DateOnly))
 
 	req.URL.RawQuery = query.Encode()
 	req.Header = http.Header{
@@ -228,7 +229,7 @@ func TestListItemOfQuery(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	res := ItemGetListRes{}
+	res := api.ItemGetListRes{}
 	bodyStr := w.Body.String()
 	log.Println(res)
 	json.Unmarshal([]byte(bodyStr), &res)
@@ -237,6 +238,7 @@ func TestListItemOfQuery(t *testing.T) {
 	assert.Equal(t, 1000*3, int(res.Expenses))
 	assert.Equal(t, 0, int(res.Income))
 }
+
 func TestItemGetSummary(t *testing.T) {
 	q, w, r, teardownTest := setupTestCase(t)
 	defer teardownTest(t)
@@ -295,10 +297,10 @@ func TestItemGetSummary(t *testing.T) {
 
 	// 测试 分页是否正常
 	query := url.Values{}
-	// query.Add("size", "10")
-	// query.Add("current", "1")
-	query.Add("happenedAtBegin", time.Now().AddDate(0, 0, -2).Format(time.DateTime))
-	query.Add("happenedAtEnd", time.Now().Format(time.DateTime))
+	log.Println(string(queries.KindExpenses))
+	query.Add("kind", string(queries.KindExpenses))
+	query.Add("happenedAtBegin", time.Now().AddDate(0, 0, -10).Format(time.DateOnly))
+	query.Add("happenedAtEnd", time.Now().Format(time.DateOnly))
 
 	req.URL.RawQuery = query.Encode()
 	req.Header = http.Header{
@@ -308,12 +310,12 @@ func TestItemGetSummary(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	// res := ItemGetListRes{}
-	// bodyStr := w.Body.String()
-	// log.Println(res)
-	// json.Unmarshal([]byte(bodyStr), &res)
+	res := api.ItemGetSummaryRes{}
+	bodyStr := w.Body.String()
+	json.Unmarshal([]byte(bodyStr), &res)
 
-	// assert.Equal(t, len(res.Resourses), int(3))
-	// assert.Equal(t, 1000*3, int(res.Expenses))
-	// assert.Equal(t, 0, int(res.Income))
+	log.Println(bodyStr)
+
+	assert.Equal(t, res.Total, int32(6000))
+	assert.Equal(t, 2, len(res.Groups))
 }

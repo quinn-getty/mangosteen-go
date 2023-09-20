@@ -3,6 +3,7 @@ package controller
 import (
 	"log"
 	"mangosteen/config/queries"
+	"mangosteen/internal/api"
 	"mangosteen/internal/database"
 	"mangosteen/internal/middleware"
 	"net/http"
@@ -26,15 +27,6 @@ func (ctrl *TagController) RegisterRouter(rg *gin.RouterGroup) {
 	item.GET("/:id", ctrl.Get)
 }
 
-type CreateTagReq struct {
-	Sign string `json:"sign" binding:"required"`
-	Name string `json:"name" binding:"required"`
-}
-
-type CreateTagRes struct {
-	Resource queries.Tag `json:"resource"`
-}
-
 // CreateTag godoc
 //
 // @Summary		tag
@@ -45,12 +37,12 @@ type CreateTagRes struct {
 //
 // @Security		Bearer
 //
-// @Param			body	body		CreateTagReq	true	"body参数"
-// @Success		200		{object}	CreateTagRes
+// @Param			body	body		api.CreateTagReq	true	"body参数"
+// @Success		200		{object}	api.CreateTagRes
 // @Failure		500
 // @Router			/tag [post]
 func (ctrl *TagController) Create(c *gin.Context) {
-	req := CreateTagReq{}
+	req := api.CreateTagReq{}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		log.Print("入参错误", err)
@@ -71,13 +63,9 @@ func (ctrl *TagController) Create(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, CreateTagRes{
+	c.JSON(http.StatusOK, api.CreateTagRes{
 		Resource: item,
 	})
-}
-
-type DeleteTagRes struct {
-	Resource queries.Tag `json:"resource"`
 }
 
 // TagDelete godoc
@@ -88,7 +76,7 @@ type DeleteTagRes struct {
 //	@Accept			json
 //	@Security		Bearer
 //	@Produce		json
-//	@Success		200	{object}	DeleteTagRes
+//	@Success		200	{object}	api.DeleteTagRes
 //	@Failure		500
 //	@Router			/tag/:id [post]
 func (ctrl *TagController) Delete(c *gin.Context) {
@@ -106,19 +94,9 @@ func (ctrl *TagController) Delete(c *gin.Context) {
 		c.String(500, err.Error())
 		return
 	}
-	c.JSON(http.StatusOK, DeleteTagRes{
+	c.JSON(http.StatusOK, api.DeleteTagRes{
 		Resource: tag,
 	})
-}
-
-type TagUpdateReq struct {
-	Id   int32  `json:"id" binding:"required"`
-	Sign string `json:"sign"`
-	Name string `json:"name"`
-}
-
-type TagUpdateRes struct {
-	Resource queries.Tag `json:"resource"`
 }
 
 // TagUpdate godoc
@@ -129,12 +107,12 @@ type TagUpdateRes struct {
 //		@Accept			json
 //		@Security		Bearer
 //		@Produce		json
-//	  @Param			body	body		TagUpdateReq	true	"body参数"
-//		@Success		200	{object}	TagUpdateRes
+//	  @Param			body	body		api.TagUpdateReq	true	"body参数"
+//		@Success		200	{object}	api.TagUpdateRes
 //		@Failure		500
 //		@Router			/tag [post]
 func (ctrl *TagController) Update(c *gin.Context) {
-	req := TagUpdateReq{}
+	req := api.TagUpdateReq{}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		log.Print("入参错误", err)
@@ -155,13 +133,9 @@ func (ctrl *TagController) Update(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, CreateTagRes{
+	c.JSON(http.StatusOK, api.CreateTagRes{
 		Resource: tag,
 	})
-}
-
-type FindTagRes struct {
-	Resource queries.Tag `json:"resource"`
 }
 
 // FindTag godoc
@@ -172,7 +146,7 @@ type FindTagRes struct {
 //	@Accept			json
 //	@Security		Bearer
 //	@Produce		json
-//	@Success		200	{object}	FindTagRes
+//	@Success		200	{object}	api.FindTagRes
 //	@Failure		500
 //	@Router			/tag/:id [get]
 func (ctrl *TagController) Get(c *gin.Context) {
@@ -196,15 +170,9 @@ func (ctrl *TagController) Get(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, DeleteTagRes{
+	c.JSON(http.StatusOK, api.DeleteTagRes{
 		Resource: tag,
 	})
-}
-
-type TagListReq struct{}
-
-type TagListRes struct {
-	Resource []queries.Tag `json:"resource"`
 }
 
 // TagList godoc
@@ -215,11 +183,11 @@ type TagListRes struct {
 //	@Accept			json
 //	@Security		Bearer
 //	@Produce		json
-//	@Success		200	{object}	TagListRes
+//	@Success		200	{object}	api.TagListRes
 //	@Failure		500
 //	@Router			/tag [get]
 func (ctrl *TagController) getList(c *gin.Context) {
-	res := TagListRes{}
+	res := api.TagListRes{}
 	user, _ := middleware.GetMe(c)
 	q := database.NewQuery()
 	item, err := q.ListTag(c, user.ID)

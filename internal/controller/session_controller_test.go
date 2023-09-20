@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"mangosteen/config/queries"
+	"mangosteen/internal/api"
 	"mangosteen/internal/database"
 	"net/http"
 	"strings"
@@ -53,7 +54,7 @@ func TestCreateSession(t *testing.T) {
 	req.Header.Set("Content-Type", "application/json")
 	r.ServeHTTP(w, req)
 
-	responsBody := CreateSessionResBody{}
+	responsBody := api.CreateSessionResBody{}
 	if err = json.Unmarshal(w.Body.Bytes(), &responsBody); err != nil {
 		log.Fatalln(err)
 		t.Error("没有返回jwt")

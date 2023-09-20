@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"mangosteen/config/queries"
+	"mangosteen/internal/api"
 	"mangosteen/internal/database"
 	"net/http"
 	"strings"
@@ -41,7 +42,7 @@ func TestCreateTagWithSuccess(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	bodyStr := w.Body.String()
-	resTag := CreateTagRes{}
+	resTag := api.CreateTagRes{}
 	json.Unmarshal([]byte(bodyStr), &resTag)
 	assert.Equal(t, resTag.Resource.UserID, user.ID)
 	assert.Equal(t, resTag.Resource.Name, "通勤")
@@ -110,7 +111,7 @@ func TestListTagWithError(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	bodyStr := w.Body.String()
-	resTag := TagListRes{}
+	resTag := api.TagListRes{}
 	json.Unmarshal([]byte(bodyStr), &resTag)
 	assert.Equal(t, len(resTag.Resource), int(1))
 }
@@ -153,7 +154,7 @@ func TestUpdateTagWithSuccess(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	bodyStr := w.Body.String()
-	resTag := TagUpdateRes{}
+	resTag := api.TagUpdateRes{}
 	json.Unmarshal([]byte(bodyStr), &resTag)
 	assert.Equal(t, resTag.Resource.ID, tag.ID)
 	assert.Equal(t, resTag.Resource.Name, "吃饭")
@@ -197,7 +198,7 @@ func TestDeleteTagWithSuccess(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	bodyStr := w.Body.String()
-	resTag := DeleteTagRes{}
+	resTag := api.DeleteTagRes{}
 	json.Unmarshal([]byte(bodyStr), &resTag)
 	assert.Equal(t, resTag.Resource.ID, tag.ID)
 	log.Println(resTag)
@@ -249,7 +250,7 @@ func TestFindTagWithSuccess(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	bodyStr := w.Body.String()
-	resTag := DeleteTagRes{}
+	resTag := api.DeleteTagRes{}
 
 	json.Unmarshal([]byte(bodyStr), &resTag)
 	assert.Equal(t, resTag.Resource.ID, tag.ID)

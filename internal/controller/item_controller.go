@@ -3,9 +3,11 @@ package controller
 import (
 	"log"
 	"mangosteen/config/queries"
+	"mangosteen/internal/api"
 	"mangosteen/internal/database"
 	"mangosteen/internal/middleware"
 	"net/http"
+	"sort"
 	"strconv"
 	"time"
 
@@ -22,17 +24,6 @@ func (ctrl *ItemController) RegisterRouter(rg *gin.RouterGroup) {
 	item.GET("/summary", ctrl.GetSummary)
 }
 
-type CreateItemReq struct {
-	Amount     int32        `json:"amount" binding:"required"`
-	Kind       queries.Kind `json:"kind" binding:"required"`
-	HappenedAt time.Time    `json:"happenedAt" binding:"required"`
-	TagIds     []int32      `json:"tagIds" binding:"required"`
-}
-
-type CreateItemRes struct {
-	Resource queries.Item `json:"resource"`
-}
-
 // CreateItem godoc
 //
 //	@Summary		创建item
@@ -41,11 +32,11 @@ type CreateItemRes struct {
 //	@Tags			item
 //	@Accept			json
 //	@Produce		json
-//	@Param			body	body		CreateItemReq	true	"body参数"
-//	@Success		200		{object}	CreateItemRes
+//	@Param			body	body		api.CreateItemReq	true	"body参数"
+//	@Success		200		{object}	api.CreateItemRes
 //	@Router			/item [post]
 func (ctrl *ItemController) Create(c *gin.Context) {
-	req := CreateItemReq{}
+	req := api.CreateItemReq{}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		log.Print("入参错误", err)
@@ -68,7 +59,7 @@ func (ctrl *ItemController) Create(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, CreateItemRes{
+	c.JSON(http.StatusOK, api.CreateItemRes{
 		Resource: item,
 	})
 
@@ -78,26 +69,6 @@ func (ctrl *ItemController) Delete(c *gin.Context) {}
 func (ctrl *ItemController) Update(c *gin.Context) {}
 func (ctrl *ItemController) Get(c *gin.Context)    {}
 
-type Pager struct {
-	Total   int64 `json:"total"`
-	Current int32 `json:"current" binding:"required"`
-	Size    int32 `json:"size" binding:"required"`
-}
-
-type ItemGetListRes struct {
-	Resourses []queries.Item `json:"resourses"`
-	Pager     Pager          `json:"pager"`
-	Income    int32          `json:"inCome"`
-	Expenses  int32          `json:"expenses"`
-}
-
-type ItemGetListReq struct {
-	Current         int32     `json:"current" binding:"required"`
-	Size            int32     `json:"size" binding:"required"`
-	HappenedAtBegin time.Time `json:"happenedAtBegin" `
-	HappenedAtEnd   time.Time `json:"happenedAtEnd" `
-}
-
 // ItemList godoc
 //
 //	@Summary		item List
@@ -106,11 +77,11 @@ type ItemGetListReq struct {
 //	@Tags			item
 //	@Accept			json
 //	@Produce		json
-//	@Param			query	query		ItemGetListReq	true	"query参数"
-//	@Success		200		{object}	ItemGetListRes
+//	@Param			query	query		api.ItemGetListReq	true	"query参数"
+//	@Success		200		{object}	api.ItemGetListRes
 //	@Router			/item [get]
 func (ctrl *ItemController) getList(c *gin.Context) {
-	params := ItemGetListReq{
+	params := api.ItemGetListReq{
 		HappenedAtBegin: time.Now().AddDate(-100, 0, 0),
 		HappenedAtEnd:   time.Now().AddDate(0, 0, 1),
 	}
@@ -140,7 +111,7 @@ func (ctrl *ItemController) getList(c *gin.Context) {
 		log.Print("解析出错happenedAtBegin ", happenedAtBeginStr, " ", err)
 	} else {
 		log.Println(happenedAtBegin)
-		params.HappenedAtBegin = happenedAtBegin
+		params.HappenedAtBegin = happenedAtBegin.Add(time.Minute * 59).Add(time.Second * 59)
 	}
 
 	happenedAtEndStr, _ := c.GetQuery("happenedAtEnd")
@@ -148,14 +119,14 @@ func (ctrl *ItemController) getList(c *gin.Context) {
 		log.Print("解析出错happenedAtEnd ", happenedAtEnd, " ", err)
 	} else {
 		log.Println(happenedAtEnd)
-		params.HappenedAtEnd = happenedAtEnd
+		params.HappenedAtEnd = happenedAtEnd.Add(time.Hour * 23).Add(time.Minute * 59).Add(time.Second * 59)
 	}
 
 	q := database.NewQuery()
 
-	res := ItemGetListRes{
+	res := api.ItemGetListRes{
 		Resourses: []queries.Item{},
-		Pager: Pager{
+		Pager: api.Pager{
 			Current: params.Current,
 			Size:    params.Size,
 			Total:   0,
@@ -222,20 +193,6 @@ func (ctrl *ItemController) getList(c *gin.Context) {
 	c.JSON(http.StatusOK, res)
 }
 
-type ItemGetSummaryRes struct {
-	Resourses []queries.Item `json:"resourses"`
-	Pager     Pager          `json:"pager"`
-	Income    int32          `json:"inCome"`
-	Expenses  int32          `json:"expenses"`
-}
-
-type ItemGetSummaryReq struct {
-	HappenedAtBegin time.Time    `json:"happenedAtBegin" `
-	HappenedAtEnd   time.Time    `json:"happenedAtEnd" `
-	Kind            queries.Kind `json:"kind" `
-	GroupBy         string       `json:"groupBy"`
-}
-
 // ItemList godoc
 //
 //	@Summary		item List
@@ -244,16 +201,83 @@ type ItemGetSummaryReq struct {
 //	@Tags			item
 //	@Accept			json
 //	@Produce		json
-//	@Param			query	query		ItemGetSummaryReq	true	"query参数"
-//	@Success		200		{object}	ItemGetSummaryRes
+//	@Param			query	query		api.ItemGetSummaryReq	true	"query参数"
+//	@Success		200		{object}	api.ItemGetSummaryRes
 //	@Router			/summary [get]
 func (ctrl *ItemController) GetSummary(c *gin.Context) {
-	req := ItemGetSummaryReq{}
-	res := ItemGetListRes{}
-	err := c.BindQuery(req)
-	if err != nil {
-		c.String(http.StatusBadRequest, "参数错误")
+	req := api.ItemGetSummaryReq{}
+	res := api.ItemGetSummaryRes{}
+	res.Groups = []api.ItemGetSummaryResGroups{}
+	res.Total = 0
+	q := database.NewQuery()
+	user, _ := middleware.GetMe(c)
+
+	log.Print("url", c.Request.URL)
+
+	if kind, _ := c.GetQuery("kind"); kind == "" {
+		log.Print(kind)
+		c.Status(http.StatusBadRequest)
 		return
+	} else {
+		req.Kind = queries.Kind(kind)
 	}
+
+	happenedAtBeginStr, _ := c.GetQuery("happenedAtBegin")
+	if happenedAtBegin, err := time.Parse(time.DateOnly, happenedAtBeginStr); err != nil {
+		log.Print("解析出错happenedAtBegin ", happenedAtBeginStr, " ", err)
+		c.Status(http.StatusBadRequest)
+		return
+	} else {
+		req.HappenedAtBegin = happenedAtBegin
+	}
+
+	happenedAtEndStr, _ := c.GetQuery("happenedAtEnd")
+	if happenedAtEnd, err := time.Parse(time.DateOnly, happenedAtEndStr); err != nil {
+		log.Print("解析出错happenedAtEnd ", happenedAtEnd, " ", err)
+		c.Status(http.StatusBadRequest)
+		return
+	} else {
+		req.HappenedAtEnd = happenedAtEnd
+	}
+
+	log.Println(req.Kind)
+
+	items, err := q.ListItemsByHappenedAtAndKind(database.DBCtx, queries.ListItemsByHappenedAtAndKindParams{
+		Kind:            req.Kind,
+		HappenedAtBegin: req.HappenedAtBegin,
+		HappenedAtEnd:   req.HappenedAtEnd,
+		UserID:          user.ID,
+	})
+	log.Println(items)
+	if err != nil {
+		c.Status(500)
+	}
+
+	log.Print("items:", items)
+
+	for _, item := range items {
+		k := item.HappenedAt.Format(time.DateOnly)
+		res.Total += item.Amount
+
+		found := false
+		for index, group := range res.Groups {
+			if group.HappenedAt == k {
+				found = true
+				res.Groups[index].Amount += item.Amount
+			}
+		}
+		if !found {
+			res.Groups = append(res.Groups, api.ItemGetSummaryResGroups{
+				HappenedAt: k,
+				Amount:     item.Amount,
+			})
+		}
+	}
+	sort.Slice(res.Groups, func(i, j int) bool {
+		return res.Groups[i].HappenedAt < res.Groups[j].HappenedAt
+	})
+
+	log.Println(res)
+
 	c.JSON(http.StatusOK, res)
 }

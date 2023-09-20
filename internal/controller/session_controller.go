@@ -3,6 +3,7 @@ package controller
 import (
 	"log"
 	"mangosteen/config/queries"
+	"mangosteen/internal/api"
 	"mangosteen/internal/database"
 	"mangosteen/internal/jwt_helper"
 	"net/http"
@@ -11,16 +12,6 @@ import (
 )
 
 type SessionController struct {
-}
-
-type CreateSessionReqBody struct {
-	Email string `json:"email" binging:"required"`
-	Code  string `json:"code" binging:"required"`
-}
-
-type CreateSessionResBody struct {
-	JWT    string `json:"jwt"`
-	UserId int32  `json:"userId"`
 }
 
 func (ctrl *SessionController) RegisterRouter(rg *gin.RouterGroup) {
@@ -35,12 +26,12 @@ func (ctrl *SessionController) RegisterRouter(rg *gin.RouterGroup) {
 // @Tags			登录鉴权
 // @Accept			json
 // @Produce		json
-// @Param			body	body		CreateSessionReqBody	true	"body参数"
-// @Success		200		{object}	CreateSessionResBody
+// @Param			body	body		api.CreateSessionReqBody	true	"body参数"
+// @Success		200		{object}	api.CreateSessionResBody
 // @Failure		500
 // @Router			/session [post]
 func (ctrl *SessionController) Create(ctx *gin.Context) {
-	var reqBody CreateSessionReqBody
+	var reqBody api.CreateSessionReqBody
 	if err := ctx.ShouldBindJSON(&reqBody); err != nil {
 		log.Println("入参错误")
 		ctx.String(http.StatusBadRequest, "参数错误")
@@ -72,7 +63,7 @@ func (ctrl *SessionController) Create(ctx *gin.Context) {
 		ctx.String(http.StatusInternalServerError, "稍后重试")
 	}
 
-	resBody := CreateSessionResBody{
+	resBody := api.CreateSessionResBody{
 		JWT:    jwt,
 		UserId: user.ID,
 	}

@@ -41,3 +41,16 @@ WHERE
 DELETE FROM items
 WHERE user_id = $1;
 
+-- name: ListItemsByHappenedAtAndKind :many
+SELECT
+  *
+FROM
+  items
+WHERE
+  happened_at >= @happened_at_begin
+  AND happened_at < @happened_at_end
+  AND kind = $1
+  AND user_id = @user_id
+ORDER BY
+  happened_at DESC;
+
